@@ -233,155 +233,130 @@
   </div>
 
   <script>
-    // Pega os elementos da tela pelo ID
-    const messages = document.getElementById('messages')
-    const inputField = document.getElementById('inputField')
-    const sendBtn = document.getElementById('sendBtn')
+  const messages = document.getElementById('messages')
+  const inputField = document.getElementById('inputField')
+  const sendBtn = document.getElementById('sendBtn')
+  const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
+  const meses = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez']
 
-    // Função que cria uma bolha de mensagem
-    function addBubble(text, sender) {
-      const bubble = document.createElement('div')
-      bubble.classList.add('bubble', sender)
-      bubble.textContent = text
-      messages.appendChild(bubble)
-      messages.scrollTop = messages.scrollHeight
-    }
+  // Eventos carregados do banco
+  let eventos = []
 
-// Salva os eventos em memória (por enquanto — banco de dados vem depois)
-let eventos = []
-
-async function sendMessage() {
-  const text = inputField.value.trim()
-  if (!text) return
-
-  addBubble(text, 'user')
-  inputField.value = ''
-  
-  // Mostra que a Maya está pensando
-  addBubble('...', 'maya')
-  atualizarCalendario()
-
-  try {
-    // Manda a mensagem para o servidor
-    const resposta = await fetch('/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mensagem: text, eventos: eventos })
-    })
-
-    // Converte a resposta para objeto JavaScript
-    const dados = await resposta.json()
-
-    // Remove o "..."
-    messages.lastChild.remove()
-
-    // Se tiver conflito, avisa
-    if (dados.conflito) {
-      addBubble(`⚠️ ${dados.mensagem_conflito}`, 'maya')
-      return
-    }
-
-    // Salva o evento na lista
-    eventos.push(dados)
-
-    // Mostra a confirmação da Maya
-    addBubble(dados.confirmacao, 'maya')
-
-  } catch (erro) {
-    messages.lastChild.remove()
-    addBubble('Ops, algo deu errado. Tenta de novo.', 'maya')
-    console.error(erro)
-  }
-}
-
-    // Escuta o clique no botão
-    sendBtn.addEventListener('click', sendMessage)
-
-    // Escuta o Enter no teclado
-    inputField.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') sendMessage()
-    })
-    // Nomes dos dias e meses em português
-    const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
-    const meses = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez']
-
-    // Constrói a grade semanal
-    function buildCalendar() {
-      const grid = document.getElementById('weekGrid')
-      const weekRange = document.getElementById('weekRange')
-      grid.innerHTML = ''
-
-      const hoje = new Date()
-      
-      // Encontra o domingo desta semana
-      const domingo = new Date(hoje)
-      domingo.setDate(hoje.getDate() - hoje.getDay())
-
-      // Mostra o intervalo da semana no header
-      const sabado = new Date(domingo)
-      sabado.setDate(domingo.getDate() + 6)
-      weekRange.textContent = `${domingo.getDate()} ${meses[domingo.getMonth()]} – ${sabado.getDate()} ${meses[sabado.getMonth()]}`
-
-      // Cria uma coluna para cada dia da semana
-      for (let i = 0; i < 7; i++) {
-        const dia = new Date(domingo)
-        dia.setDate(domingo.getDate() + i)
-
-        const coluna = document.createElement('div')
-        coluna.classList.add('day-column')
-
-        // Nome do dia (Dom, Seg...)
-        const nomeDia = document.createElement('div')
-        nomeDia.classList.add('day-name')
-        nomeDia.textContent = diasSemana[i]
-
-        // Número do dia
-        const numeroDia = document.createElement('div')
-        numeroDia.classList.add('day-number')
-        numeroDia.textContent = dia.getDate()
-
-        // Marca o dia de hoje com fundo prata
-        if (dia.toDateString() === hoje.toDateString()) {
-          numeroDia.classList.add('today')
-        }
-
-        coluna.appendChild(nomeDia)
-        coluna.appendChild(numeroDia)
-
-        // Filtra os eventos deste dia e adiciona como pills
-        const eventosDoDia = eventos.filter(ev => {
-          if (!ev.data) return false
-          const dataEvento = new Date(ev.data + 'T00:00:00')
-          return dataEvento.toDateString() === dia.toDateString()
-        })
-
-        eventosDoDia.forEach(ev => {
-          const pill = document.createElement('div')
-          pill.classList.add('event-pill', ev.tipo)
-
-          // Se tiver hora, mostra a hora + título
-          // Se for tarefa, mostra só o título
-          if (ev.hora) {
-            pill.innerHTML = `<span class="pill-time">${ev.hora}</span>${ev.titulo}`
-          } else {
-            pill.textContent = ev.titulo
-          }
-
-          coluna.appendChild(pill)
-        })
-
-        grid.appendChild(coluna)
-      }
-    }
-
-    // Reconstrói o calendário toda vez que um evento é adicionado
-    function atualizarCalendario() {
-      buildCalendar()
-    }
-
-    // Constrói o calendário quando a página carrega
+  // Carrega eventos do Supabase quando a página abre
+  async function carregarEventos() {
+    const resposta = await fetch('/eventos')
+    eventos = await resposta.json()
     buildCalendar()
-  </script>
+  }
+
+  function addBubble(text, sender) {
+    const bubble = document.createElement('div')
+    bubble.classList.add('bubble', sender)
+    bubble.textContent = text
+    messages.appendChild(bubble)
+    messages.scrollTop = messages.scrollHeight
+  }
+
+  async function sendMessage() {
+    const text = inputField.value.trim()
+    if (!text) return
+
+    addBubble(text, 'user')
+    inputField.value = ''
+    addBubble('...', 'maya')
+
+    try {
+      const resposta = await fetch('/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mensagem: text, eventos })
+      })
+
+      const dados = await resposta.json()
+      messages.lastChild.remove()
+
+      if (dados.conflito) {
+        addBubble(`⚠️ ${dados.mensagem_conflito}`, 'maya')
+        return
+      }
+
+      // Adiciona os novos eventos à lista local
+      if (dados.lista) {
+        eventos.push(...dados.lista)
+      }
+
+      addBubble(dados.confirmacao, 'maya')
+      buildCalendar()
+
+    } catch (erro) {
+      messages.lastChild.remove()
+      addBubble('Ops, algo deu errado. Tenta de novo.', 'maya')
+      console.error(erro)
+    }
+  }
+
+  function buildCalendar() {
+    const grid = document.getElementById('weekGrid')
+    const weekRange = document.getElementById('weekRange')
+    grid.innerHTML = ''
+
+    const hoje = new Date()
+    const domingo = new Date(hoje)
+    domingo.setDate(hoje.getDate() - hoje.getDay())
+    const sabado = new Date(domingo)
+    sabado.setDate(domingo.getDate() + 6)
+    weekRange.textContent = `${domingo.getDate()} ${meses[domingo.getMonth()]} – ${sabado.getDate()} ${meses[sabado.getMonth()]}`
+
+    for (let i = 0; i < 7; i++) {
+      const dia = new Date(domingo)
+      dia.setDate(domingo.getDate() + i)
+
+      const coluna = document.createElement('div')
+      coluna.classList.add('day-column')
+
+      const nomeDia = document.createElement('div')
+      nomeDia.classList.add('day-name')
+      nomeDia.textContent = diasSemana[i]
+
+      const numeroDia = document.createElement('div')
+      numeroDia.classList.add('day-number')
+      numeroDia.textContent = dia.getDate()
+      if (dia.toDateString() === hoje.toDateString()) {
+        numeroDia.classList.add('today')
+      }
+
+      coluna.appendChild(nomeDia)
+      coluna.appendChild(numeroDia)
+
+      const eventosDoDia = eventos.filter(ev => {
+        if (!ev.data) return false
+        const dataEvento = new Date(ev.data + 'T00:00:00')
+        return dataEvento.toDateString() === dia.toDateString()
+      })
+
+      eventosDoDia.forEach(ev => {
+        const pill = document.createElement('div')
+        pill.classList.add('event-pill', ev.tipo)
+        if (ev.hora) {
+          pill.innerHTML = `<span class="pill-time">${ev.hora}</span>${ev.titulo}`
+        } else {
+          pill.textContent = ev.titulo
+        }
+        coluna.appendChild(pill)
+      })
+
+      grid.appendChild(coluna)
+    }
+  }
+
+  sendBtn.addEventListener('click', sendMessage)
+  inputField.addEventListener('keydown', e => {
+    if (e.key === 'Enter') sendMessage()
+  })
+
+  // Carrega os eventos do banco ao abrir
+  carregarEventos()
+</script>
 <div class="calendar">
     <div class="calendar-header">
       <h2>Esta semana</h2>

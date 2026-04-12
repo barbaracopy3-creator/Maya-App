@@ -1,74 +1,102 @@
-// Carrega as variáveis do arquivo .env para o processo
 require('dotenv').config({ path: require('path').resolve(__dirname, '.env') })
 
-// Importa os pacotes instalados
 const express = require('express')
 const cors = require('cors')
-
-// Importa o cliente oficial da OpenAI
 const OpenAI = require('openai')
+const { createClient } = require('@supabase/supabase-js')
 
-// Cria a aplicação Express — ela vai ser o seu servidor
 const app = express()
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY)
 
-// Cria o cliente OpenAI usando a chave do .env
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
+app.use(cors())
+app.use(express.json())
+app.use(express.static('public'))
+
+// Busca todos os eventos do banco
+app.get('/eventos', async (req, res) => {
+  const { data, error } = await supabase
+    .from('events')
+    .select('*')
+    .order('data', { ascending: true })
+
+  if (error) return res.status(500).json({ erro: error.message })
+  res.json(data)
 })
 
-// Middlewares — são funções que rodam em toda requisição antes do seu código
-app.use(cors())           // permite o browser falar com o servidor
-app.use(express.json())   // permite receber dados em formato JSON
-app.use(express.static('public')) // serve os arquivos da pasta public (seu HTML)
-
-// Rota principal — quando o browser mandar POST para /chat
+// Recebe mensagem, chama IA, salva no banco
 app.post('/chat', async (req, res) => {
-
-  // Pega a mensagem que veio do browser
   const { mensagem, eventos } = req.body
 
   try {
-    // Chama a API da OpenAI
     const resposta = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
         {
           role: 'system',
-          content: `Você é a Maya, uma assistente de agenda inteligente.
-Quando o usuário mandar uma mensagem, você deve:
-1. Identificar se é um evento (tem hora marcada) ou tarefa (sem hora)
-2. Extrair as informações e responder SEMPRE em JSON puro, sem texto extra
+          content: `Você é a Maya, assistente de agenda inteligente.
 
-Formato obrigatório para evento:
-{"tipo":"evento","titulo":"nome do evento","data":"YYYY-MM-DD","hora":"HH:MM","confirmacao":"mensagem amigável confirmando"}
+Analise a mensagem e retorne SEMPRE um JSON puro, sem texto extra.
 
-Formato obrigatório para tarefa:
-{"tipo":"tarefa","titulo":"nome da tarefa","data":"YYYY-MM-DD","confirmacao":"mensagem amigável confirmando"}
+REGRAS:
+- Se for um evento único: retorna um objeto
+- Se for recorrente (ex: "toda segunda", "segunda e terça", "todo dia"): retorna um ARRAY de objetos, um para cada dia
+- Extraia: titulo, tipo (evento ou tarefa), data (YYYY-MM-DD), hora (HH:MM ou null), confirmacao
+- Datas relativas: hoje é ${new Date().toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+- Para dias da semana como "segunda e terça", calcule as próximas ocorrências
+- Para "toda segunda", gere as próximas 4 ocorrências
 
-Datas relativas: hoje é ${new Date().toLocaleDateString('pt-BR', {weekday:'long', year:'numeric', month:'long', day:'numeric'})}.
-"amanhã" = dia seguinte, "quinta" = próxima quinta-feira, etc.
+FORMATO evento único:
+{"tipo":"evento","titulo":"nome","data":"YYYY-MM-DD","hora":"HH:MM","confirmacao":"mensagem amigável"}
 
-Eventos já existentes na agenda (para detectar conflitos):
+FORMATO recorrente (array):
+[
+  {"tipo":"evento","titulo":"nome","data":"YYYY-MM-DD","hora":"HH:MM","confirmacao":"mensagem amigável"},
+  {"tipo":"evento","titulo":"nome","data":"YYYY-MM-DD","hora":"HH:MM","confirmacao":""}
+]
+Só o primeiro objeto do array precisa ter a confirmacao preenchida, os outros deixa vazio.
+
+CONFLITOS: eventos existentes na agenda:
 ${JSON.stringify(eventos || [])}
-
-Se houver conflito de horário (menos de 30 minutos de diferença), adicione ao JSON:
-"conflito": true, "mensagem_conflito": "explicação do conflito e sugestão de horário livre"`
+Se houver conflito (menos de 30 min de diferença), adicione "conflito": true e "mensagem_conflito": "explicação e sugestão"`
         },
-        {
-          role: 'user',
-          content: mensagem
-        }
+        { role: 'user', content: mensagem }
       ]
     })
 
-    // Pega o texto da resposta
     const texto = resposta.choices[0].message.content
-
-    // Converte de texto JSON para objeto JavaScript
     const dados = JSON.parse(texto)
 
-    // Manda de volta para o browser
-    res.json(dados)
+    // Normaliza — transforma objeto único em array para tratar tudo igual
+    const lista = Array.isArray(dados) ? dados : [dados]
+
+    // Verifica conflito em qualquer item da lista
+    const conflito = lista.find(ev => ev.conflito)
+    if (conflito) {
+      return res.json({
+        conflito: true,
+        mensagem_conflito: conflito.mensagem_conflito
+      })
+    }
+
+    // Salva todos os eventos no Supabase
+    const { error } = await supabase.from('events').insert(
+      lista.map(ev => ({
+        titulo: ev.titulo,
+        tipo: ev.tipo,
+        data: ev.data,
+        hora: ev.hora || null
+      }))
+    )
+
+    if (error) throw error
+
+    // Retorna confirmação do primeiro evento (os outros são silenciosos)
+    res.json({
+      lista,
+      confirmacao: lista[0].confirmacao,
+      tipo: lista[0].tipo
+    })
 
   } catch (erro) {
     console.error('Erro:', erro)
@@ -76,7 +104,6 @@ Se houver conflito de horário (menos de 30 minutos de diferença), adicione ao 
   }
 })
 
-// Liga o servidor na porta definida no .env
 const PORT = process.env.PORT || 3000
 app.listen(PORT, () => {
   console.log(`Maya rodando em http://localhost:${PORT}`)
