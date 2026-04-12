@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maya</title>
+  <style>
+    /* CALENDÁRIO */
+    .calendar {
+      padding: 20px 24px;
+      border-top: 0.5px solid rgba(0,0,0,0.08);
+    }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .calendar-header h2 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1C1C1E;
+    }
+
+    .calendar-header span {
+      font-size: 12px;
+      color: #8A8A8E;
+    }
+
+    .week-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+    }
+
+    .day-column {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .day-name {
+      font-size: 11px;
+      font-weight: 500;
+      color: #8A8A8E;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      margin-bottom: 4px;
+    }
+
+    .day-number {
+      font-size: 13px;
+      font-weight: 500;
+      color: #1C1C1E;
+      text-align: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 4px;
+    }
+
+    .day-number.today {
+      background: #A0A0A0;
+      color: white;
+    }
+
+    .event-pill {
+      background: #F2F2F7;
+      border: 0.5px solid rgba(0,0,0,0.08);
+      border-radius: 6px;
+      padding: 4px 6px;
+      font-size: 11px;
+      color: #1C1C1E;
+      line-height: 1.3;
+      cursor: default;
+    }
+
+    .event-pill .pill-time {
+      font-size: 10px;
+      color: #8A8A8E;
+      display: block;
+    }
+
+    .event-pill.task {
+      border-left: 2px solid #A0A0A0;
+      border-radius: 0 6px 6px 0;
+    }
+
+    .event-pill.event {
+      border-left: 2px solid #1C1C1E;
+      border-radius: 0 6px 6px 0;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #FAFAFA;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    .header {
+      padding: 20px 24px 16px;
+      border-bottom: 0.5px solid rgba(0,0,0,0.08);
+      background: white;
+    }
+
+    .header h1 {
+      font-size: 22px;
+      font-weight: 600;
+      color: #1C1C1E;
+      letter-spacing: -0.3px;
+    }
+
+    .header p {
+      font-size: 13px;
+      color: #8A8A8E;
+      margin-top: 2px;
+    }
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .bubble {
+      max-width: 80%;
+      padding: 10px 14px;
+      border-radius: 18px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .bubble.user {
+      background: #A0A0A0;
+      color: white;
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+    }
+
+    .bubble.maya {
+      background: white;
+      color: #1C1C1E;
+      align-self: flex-start;
+      border: 0.5px solid rgba(0,0,0,0.08);
+      border-bottom-left-radius: 4px;
+    }
+
+    .input-area {
+      padding: 12px 24px 24px;
+      background: white;
+      border-top: 0.5px solid rgba(0,0,0,0.08);
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .input-area input {
+      flex: 1;
+      border: 0.5px solid rgba(0,0,0,0.12);
+      border-radius: 22px;
+      padding: 10px 16px;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      background: #F2F2F7;
+      color: #1C1C1E;
+    }
+
+    .input-area input::placeholder {
+      color: #AEAEB2;
+    }
+
+    .input-area button {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #A0A0A0;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .input-area button svg {
+      width: 16px;
+      height: 16px;
+      fill: white;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Maya</h1>
+    <p>Sua agenda inteligente</p>
+  </div>
+
+  <div class="messages" id="messages">
+    <div class="bubble maya">
+      Oi! Sou a Maya. Me diga um compromisso, tarefa ou lembrete — pode ser do jeito que você fala mesmo.
+    </div>
+  </div>
+
+  <div class="input-area">
+    <input 
+      type="text" 
+      id="inputField" 
+      placeholder="Ex: reunião quinta às 14h..." 
+    />
+    <button id="sendBtn">
+      <svg viewBox="0 0 24 24">
+        <path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>
+      </svg>
+    </button>
+  </div>
+
+  <script>
+    // Pega os elementos da tela pelo ID
+    const messages = document.getElementById('messages')
+    const inputField = document.getElementById('inputField')
+    const sendBtn = document.getElementById('sendBtn')
+
+    // Função que cria uma bolha de mensagem
+    function addBubble(text, sender) {
+      const bubble = document.createElement('div')
+      bubble.classList.add('bubble', sender)
+      bubble.textContent = text
+      messages.appendChild(bubble)
+      messages.scrollTop = messages.scrollHeight
+    }
+
+// Salva os eventos em memória (por enquanto — banco de dados vem depois)
+let eventos = []
+
+async function sendMessage() {
+  const text = inputField.value.trim()
+  if (!text) return
+
+  addBubble(text, 'user')
+  inputField.value = ''
+  
+  // Mostra que a Maya está pensando
+  addBubble('...', 'maya')
+  atualizarCalendario()
+
+  try {
+    // Manda a mensagem para o servidor
+    const resposta = await fetch('/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mensagem: text, eventos: eventos })
+    })
+
+    // Converte a resposta para objeto JavaScript
+    const dados = await resposta.json()
+
+    // Remove o "..."
+    messages.lastChild.remove()
+
+    // Se tiver conflito, avisa
+    if (dados.conflito) {
+      addBubble(`⚠️ ${dados.mensagem_conflito}`, 'maya')
+      return
+    }
+
+    // Salva o evento na lista
+    eventos.push(dados)
+
+    // Mostra a confirmação da Maya
+    addBubble(dados.confirmacao, 'maya')
+
+  } catch (erro) {
+    messages.lastChild.remove()
+    addBubble('Ops, algo deu errado. Tenta de novo.', 'maya')
+    console.error(erro)
+  }
+}
+
+    // Escuta o clique no botão
+    sendBtn.addEventListener('click', sendMessage)
+
+    // Escuta o Enter no teclado
+    inputField.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') sendMessage()
+    })
+    // Nomes dos dias e meses em português
+    const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
+    const meses = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez']
+
+    // Constrói a grade semanal
+    function buildCalendar() {
+      const grid = document.getElementById('weekGrid')
+      const weekRange = document.getElementById('weekRange')
+      grid.innerHTML = ''
+
+      const hoje = new Date()
+      
+      // Encontra o domingo desta semana
+      const domingo = new Date(hoje)
+      domingo.setDate(hoje.getDate() - hoje.getDay())
+
+      // Mostra o intervalo da semana no header
+      const sabado = new Date(domingo)
+      sabado.setDate(domingo.getDate() + 6)
+      weekRange.textContent = `${domingo.getDate()} ${meses[domingo.getMonth()]} – ${sabado.getDate()} ${meses[sabado.getMonth()]}`
+
+      // Cria uma coluna para cada dia da semana
+      for (let i = 0; i < 7; i++) {
+        const dia = new Date(domingo)
+        dia.setDate(domingo.getDate() + i)
+
+        const coluna = document.createElement('div')
+        coluna.classList.add('day-column')
+
+        // Nome do dia (Dom, Seg...)
+        const nomeDia = document.createElement('div')
+        nomeDia.classList.add('day-name')
+        nomeDia.textContent = diasSemana[i]
+
+        // Número do dia
+        const numeroDia = document.createElement('div')
+        numeroDia.classList.add('day-number')
+        numeroDia.textContent = dia.getDate()
+
+        // Marca o dia de hoje com fundo prata
+        if (dia.toDateString() === hoje.toDateString()) {
+          numeroDia.classList.add('today')
+        }
+
+        coluna.appendChild(nomeDia)
+        coluna.appendChild(numeroDia)
+
+        // Filtra os eventos deste dia e adiciona como pills
+        const eventosDoDia = eventos.filter(ev => {
+          if (!ev.data) return false
+          const dataEvento = new Date(ev.data + 'T00:00:00')
+          return dataEvento.toDateString() === dia.toDateString()
+        })
+
+        eventosDoDia.forEach(ev => {
+          const pill = document.createElement('div')
+          pill.classList.add('event-pill', ev.tipo)
+
+          // Se tiver hora, mostra a hora + título
+          // Se for tarefa, mostra só o título
+          if (ev.hora) {
+            pill.innerHTML = `<span class="pill-time">${ev.hora}</span>${ev.titulo}`
+          } else {
+            pill.textContent = ev.titulo
+          }
+
+          coluna.appendChild(pill)
+        })
+
+        grid.appendChild(coluna)
+      }
+    }
+
+    // Reconstrói o calendário toda vez que um evento é adicionado
+    function atualizarCalendario() {
+      buildCalendar()
+    }
+
+    // Constrói o calendário quando a página carrega
+    buildCalendar()
+  </script>
+<div class="calendar">
+    <div class="calendar-header">
+      <h2>Esta semana</h2>
+      <span id="weekRange"></span>
+    </div>
+    <div class="week-grid" id="weekGrid"></div>
+  </div>
+</body>
+</html>
