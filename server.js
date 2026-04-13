@@ -59,7 +59,10 @@ Só o primeiro objeto do array precisa ter a confirmacao preenchida, os outros d
 
 CONFLITOS: eventos existentes na agenda:
 ${JSON.stringify(eventos || [])}
-Se houver conflito (menos de 30 min de diferença), adicione "conflito": true e "mensagem_conflito": "explicação e sugestão"`
+Se houver conflito (menos de 30 min de diferença), adicione "conflito": true e "mensagem_conflito": "explicação e sugestão"
+
+Se o usuário quiser apagar, deletar ou remover um evento, retorne:
+{"tipo":"delete","titulo":"nome do evento que quer apagar","confirmacao":"mensagem confirmando"}`
         },
         { role: 'user', content: mensagem }
       ]
@@ -184,6 +187,15 @@ cron.schedule('0 20 * * 0', () => {
 app.get('/icon-192.png', (req, res) => {
   const { createCanvas } = require('canvas')
   res.redirect('https://via.placeholder.com/192x192/A0A0A0/FFFFFF?text=M')
+})
+app.delete('/eventos/:id', async (req, res) => {
+  const { id } = req.params
+  const { error } = await supabase
+    .from('events')
+    .delete()
+    .eq('id', id)
+  if (error) return res.status(500).json({ erro: error.message })
+  res.json({ ok: true })
 })
 app.listen(PORT, () => {
   console.log(`Maya rodando em http://localhost:${PORT}`)
