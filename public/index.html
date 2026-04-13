@@ -425,8 +425,11 @@
     }
 
     function mostrarRelatorio(conteudo) {
-      const div = document.getElementById('relatorioConteudo')
-      div.innerHTML = `<div class="relatorio-card">${conteudo}</div>`
+    const div = document.getElementById('relatorioConteudo')
+    const formatado = conteudo
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n/g, '<br>')
+    div.innerHTML = `<div class="relatorio-card">${formatado}</div>`
     }
 
     async function gerarRelatorioAgora() {

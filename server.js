@@ -181,6 +181,10 @@ cron.schedule('0 20 * * 0', () => {
 }, {
   timezone: 'America/Sao_Paulo'
 })
+app.get('/icon-192.png', (req, res) => {
+  const { createCanvas } = require('canvas')
+  res.redirect('https://via.placeholder.com/192x192/A0A0A0/FFFFFF?text=M')
+})
 app.listen(PORT, () => {
   console.log(`Maya rodando em http://localhost:${PORT}`)
 })
