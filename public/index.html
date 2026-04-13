@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Maya</title>
+  <link rel="manifest" href="/manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Maya">
   <style>
     /* CALENDÁRIO */
     .calendar {
@@ -205,6 +209,10 @@
       fill: white;
     }
   </style>
+  <link rel="manifest" href="/manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Maya">
 </head>
 <body>
 
@@ -415,7 +423,12 @@ buildCalendar()
   carregarEventos()
   // Pede permissão quando a página carrega
   pedirPermissaoNotificacao()
-</script>
+  // Registra o Service Worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js')
+    .then(() => console.log('Service Worker registrado'))
+    .catch(err => console.log('Erro no SW:', err))
+}
 <div class="calendar">
     <div class="calendar-header">
       <h2>Esta semana</h2>
@@ -423,5 +436,6 @@ buildCalendar()
     </div>
     <div class="week-grid" id="weekGrid"></div>
   </div>
+</script>
 </body>
 </html>
