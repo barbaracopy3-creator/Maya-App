@@ -241,13 +241,64 @@
 
   // Eventos carregados do banco
   let eventos = []
+  // Pede permissão para notificações quando a página abre
+async function pedirPermissaoNotificacao() {
+  if (!('Notification' in window)) {
+    console.log('Esse browser não suporta notificações')
+    return
+  }
+  if (Notification.permission === 'default') {
+    await Notification.requestPermission()
+  }
+}
+
+// Dispara uma notificação
+function notificar(titulo, corpo) {
+  if (Notification.permission === 'granted') {
+    new Notification(titulo, {
+      body: corpo,
+      icon: '/icon.png'
+    })
+  }
+}
+
+// Agenda um alerta 30 minutos antes do evento
+function agendarAlerta(evento) {
+  if (!evento.hora || !evento.data) return
+
+  // Monta a data e hora completa do evento
+  const dataHoraEvento = new Date(`${evento.data}T${evento.hora}:00`)
+  
+  // Calcula 30 minutos antes
+  const trintaMinutesAntes = new Date(dataHoraEvento.getTime() - 2 * 60 * 1000)
+  
+  // Calcula quantos milissegundos faltam para o alerta
+  const agora = new Date()
+  const msAteAlerta = trintaMinutesAntes.getTime() - agora.getTime()
+
+  // Só agenda se ainda não passou
+  if (msAteAlerta > 0) {
+    setTimeout(() => {
+      notificar(
+        `⏰ Em 30 minutos: ${evento.titulo}`,
+        `Hoje às ${evento.hora}`
+      )
+    }, msAteAlerta)
+
+    console.log(`Alerta agendado para ${evento.titulo} em ${Math.round(msAteAlerta / 60000)} minutos`)
+  }
+}
 
   // Carrega eventos do Supabase quando a página abre
   async function carregarEventos() {
-    const resposta = await fetch('/eventos')
-    eventos = await resposta.json()
-    buildCalendar()
-  }
+  const resposta = await fetch('/eventos')
+  eventos = await resposta.json()
+  
+  // Agenda alertas para todos os eventos já salvos
+  eventos.forEach(ev => agendarAlerta(ev))
+  
+  buildCalendar()
+}
 
   function addBubble(text, sender) {
     const bubble = document.createElement('div')
@@ -286,7 +337,13 @@
       }
 
       addBubble(dados.confirmacao, 'maya')
-      buildCalendar()
+
+// Agenda alerta para cada evento novo
+if (dados.lista) {
+  dados.lista.forEach(ev => agendarAlerta(ev))
+}
+
+buildCalendar()
 
     } catch (erro) {
       messages.lastChild.remove()
@@ -356,6 +413,8 @@
 
   // Carrega os eventos do banco ao abrir
   carregarEventos()
+  // Pede permissão quando a página carrega
+  pedirPermissaoNotificacao()
 </script>
 <div class="calendar">
     <div class="calendar-header">
