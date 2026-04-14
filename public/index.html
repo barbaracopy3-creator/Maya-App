@@ -10,6 +10,203 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Maya">
   <style>
+    .tabs {
+      display: flex;
+      border-bottom: 0.5px solid rgba(0,0,0,0.08);
+      background: white;
+      padding: 0 24px;
+    }
+
+    .tab {
+      font-size: 13px;
+      font-weight: 500;
+      color: #8A8A8E;
+      padding: 10px 16px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -0.5px;
+    }
+
+    .tab.active {
+      color: #1C1C1E;
+      border-bottom-color: #A0A0A0;
+    }
+
+    .tab-content {
+      display: none;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .tab-content.active {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .diario-section {
+      padding: 20px 24px;
+    }
+
+    .humor-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .humor-btn {
+      font-size: 20px;
+      background: none;
+      border: 0.5px solid rgba(0,0,0,0.08);
+      border-radius: 10px;
+      padding: 6px 10px;
+      cursor: pointer;
+      opacity: 0.4;
+      transition: opacity 0.15s;
+    }
+
+    .humor-btn.selected {
+      opacity: 1;
+      background: #F2F2F7;
+    }
+
+    .diario-textarea {
+      width: 100%;
+      border: 0.5px solid rgba(0,0,0,0.12);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      resize: none;
+      background: #F2F2F7;
+      color: #1C1C1E;
+      min-height: 120px;
+      line-height: 1.6;
+    }
+
+    .diario-save-btn {
+      margin-top: 10px;
+      background: #A0A0A0;
+      color: white;
+      border: none;
+      border-radius: 22px;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-family: inherit;
+      cursor: pointer;
+      align-self: flex-end;
+    }
+
+    .diario-entry {
+      background: white;
+      border: 0.5px solid rgba(0,0,0,0.08);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-top: 10px;
+    }
+
+    .diario-entry-date {
+      font-size: 11px;
+      color: #8A8A8E;
+      margin-bottom: 6px;
+    }
+
+    .diario-entry-text {
+      font-size: 13px;
+      color: #1C1C1E;
+      line-height: 1.5;
+    }
+
+    .metas-section {
+      padding: 20px 24px;
+    }
+
+    .meta-card {
+      background: white;
+      border: 0.5px solid rgba(0,0,0,0.08);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+    }
+
+    .meta-titulo {
+      font-size: 14px;
+      font-weight: 500;
+      color: #1C1C1E;
+    }
+
+    .meta-desc {
+      font-size: 12px;
+      color: #8A8A8E;
+      margin-top: 3px;
+    }
+
+    .meta-categoria {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: #F2F2F7;
+      color: #636366;
+      display: inline-block;
+      margin-top: 6px;
+    }
+
+    .add-meta-form {
+      background: #F2F2F7;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+
+    .add-meta-form input,
+    .add-meta-form select {
+      width: 100%;
+      border: 0.5px solid rgba(0,0,0,0.12);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      background: white;
+      color: #1C1C1E;
+      margin-bottom: 8px;
+    }
+
+    .add-meta-btn {
+      background: #A0A0A0;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 8px 18px;
+      font-size: 13px;
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    .analise-btn {
+      margin: 0 24px 12px;
+      background: white;
+      border: 0.5px solid rgba(0,0,0,0.12);
+      border-radius: 22px;
+      padding: 10px 20px;
+      font-size: 13px;
+      font-family: inherit;
+      cursor: pointer;
+      color: #1C1C1E;
+      width: calc(100% - 48px);
+    }
+
+    .analise-resultado {
+      margin: 0 24px;
+      background: white;
+      border: 0.5px solid rgba(0,0,0,0.08);
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-size: 13px;
+      color: #1C1C1E;
+      line-height: 1.7;
+      white-space: pre-wrap;
+    }
     .event-pill.feito {
   opacity: 0.45;
   text-decoration: line-through;
@@ -281,38 +478,93 @@
     <p>Sua agenda inteligente</p>
   </div>
 
-  <div class="messages" id="messages">
-    <div class="bubble maya">
-      Oi! Sou a Maya. Me diga um compromisso, tarefa ou lembrete — pode ser do jeito que você fala mesmo.
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('agenda')">Agenda</div>
+    <div class="tab" onclick="switchTab('diario')">Diário</div>
+    <div class="tab" onclick="switchTab('metas')">Metas</div>
+  </div>
+
+  <!-- ABA AGENDA -->
+  <div class="tab-content active" id="tab-agenda">
+    <div class="messages" id="messages">
+      <div class="bubble maya">
+        Oi! Sou a Maya. Me diga um compromisso, tarefa ou lembrete.
+      </div>
+    </div>
+
+    <div class="input-area">
+      <input type="text" id="inputField" placeholder="Ex: reunião quinta às 14h..." />
+      <button id="sendBtn">
+        <svg viewBox="0 0 24 24">
+          <path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="calendar">
+      <div class="calendar-header">
+        <h2>Esta semana</h2>
+        <span id="weekRange"></span>
+      </div>
+      <div class="week-grid" id="weekGrid"></div>
+    </div>
+
+    <div class="relatorio-section">
+      <div class="relatorio-header">
+        <h2>Relatório da semana</h2>
+        <button class="relatorio-btn" onclick="gerarRelatorioAgora()">Gerar agora</button>
+      </div>
+      <div id="relatorioConteudo">
+        <div class="relatorio-vazio">Nenhum relatório ainda.</div>
+      </div>
     </div>
   </div>
 
-  <div class="input-area">
-    <input type="text" id="inputField" placeholder="Ex: reunião quinta às 14h..." />
-    <button id="sendBtn">
-      <svg viewBox="0 0 24 24">
-        <path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>
-      </svg>
-    </button>
+  <!-- ABA DIÁRIO -->
+  <div class="tab-content" id="tab-diario">
+    <div class="diario-section">
+      <p style="font-size:13px;color:#8A8A8E;margin-bottom:12px;">Como você está hoje?</p>
+      <div class="humor-row">
+        <button class="humor-btn" data-humor="1" onclick="selecionarHumor(1)">😔</button>
+        <button class="humor-btn" data-humor="2" onclick="selecionarHumor(2)">😕</button>
+        <button class="humor-btn" data-humor="3" onclick="selecionarHumor(3)">😐</button>
+        <button class="humor-btn" data-humor="4" onclick="selecionarHumor(4)">😊</button>
+        <button class="humor-btn" data-humor="5" onclick="selecionarHumor(5)">🤩</button>
+      </div>
+      <textarea class="diario-textarea" id="diarioTexto" placeholder="Escreva sobre seu dia, o que aconteceu, o que te travou, o que funcionou..."></textarea>
+      <div style="display:flex;justify-content:flex-end;">
+        <button class="diario-save-btn" onclick="salvarDiario()">Salvar</button>
+      </div>
+      <div id="diarioEntradas"></div>
+    </div>
   </div>
 
-  <div class="calendar">
-    <div class="calendar-header">
-      <h2>Esta semana</h2>
-      <span id="weekRange"></span>
+  <!-- ABA METAS -->
+  <div class="tab-content" id="tab-metas">
+    <div class="metas-section">
+      <div class="add-meta-form">
+        <p style="font-size:13px;font-weight:500;color:#1C1C1E;margin-bottom:10px;">Nova meta</p>
+        <input type="text" id="metaTitulo" placeholder="Ex: Ganhar R$20k por mês" />
+        <input type="text" id="metaDescricao" placeholder="Descrição (opcional)" />
+        <select id="metaCategoria">
+          <option value="">Categoria</option>
+          <option value="financeiro">💰 Financeiro</option>
+          <option value="saude">💪 Saúde</option>
+          <option value="carreira">🚀 Carreira</option>
+          <option value="relacionamentos">❤️ Relacionamentos</option>
+          <option value="aprendizado">📚 Aprendizado</option>
+          <option value="pessoal">✨ Pessoal</option>
+        </select>
+        <button class="add-meta-btn" onclick="salvarMeta()">Adicionar meta</button>
+      </div>
+      <div id="listaMetasContainer"></div>
     </div>
-    <div class="week-grid" id="weekGrid"></div>
+
+    <button class="analise-btn" onclick="gerarAnalise()">✦ Analisar alinhamento com minhas metas</button>
+    <div id="analiseResultado" style="display:none" class="analise-resultado"></div>
   </div>
 
-  <div class="relatorio-section">
-    <div class="relatorio-header">
-      <h2>Relatório da semana</h2>
-      <button class="relatorio-btn" onclick="gerarRelatorioAgora()">Gerar agora</button>
-    </div>
-    <div id="relatorioConteudo">
-      <div class="relatorio-vazio">Nenhum relatório ainda. Clica em "Gerar agora" para analisar sua semana.</div>
-    </div>
-  </div>
+</body>
 
   <script>
     async function toggleFeito(id, feito) {
@@ -364,7 +616,98 @@
         console.log(`Alerta agendado para ${evento.titulo} em ${Math.round(msAteAlerta / 60000)} minutos`)
       }
     }
+// TABS
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'))
+      document.querySelector(`[onclick="switchTab('${tab}')"]`).classList.add('active')
+      document.getElementById(`tab-${tab}`).classList.add('active')
+    }
 
+    // DIÁRIO
+    let humorSelecionado = null
+
+    function selecionarHumor(valor) {
+      humorSelecionado = valor
+      document.querySelectorAll('.humor-btn').forEach(btn => {
+        btn.classList.toggle('selected', parseInt(btn.dataset.humor) === valor)
+      })
+    }
+
+    async function salvarDiario() {
+      const conteudo = document.getElementById('diarioTexto').value.trim()
+      if (!conteudo) return
+      await fetch('/diario', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          conteudo,
+          humor: humorSelecionado,
+          data: new Date().toISOString().split('T')[0]
+        })
+      })
+      document.getElementById('diarioTexto').value = ''
+      humorSelecionado = null
+      document.querySelectorAll('.humor-btn').forEach(b => b.classList.remove('selected'))
+      carregarDiario()
+    }
+
+    async function carregarDiario() {
+      const resposta = await fetch('/diario')
+      const entradas = await resposta.json()
+      const container = document.getElementById('diarioEntradas')
+      container.innerHTML = entradas.map(e => `
+        <div class="diario-entry">
+          <div class="diario-entry-date">${new Date(e.data + 'T00:00:00').toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })} ${e.humor ? '— ' + ['😔','😕','😐','😊','🤩'][e.humor - 1] : ''}</div>
+          <div class="diario-entry-text">${e.conteudo}</div>
+        </div>
+      `).join('')
+    }
+
+    // METAS
+    async function salvarMeta() {
+      const titulo = document.getElementById('metaTitulo').value.trim()
+      if (!titulo) return
+      await fetch('/metas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          titulo,
+          descricao: document.getElementById('metaDescricao').value,
+          categoria: document.getElementById('metaCategoria').value
+        })
+      })
+      document.getElementById('metaTitulo').value = ''
+      document.getElementById('metaDescricao').value = ''
+      carregarMetas()
+    }
+
+    async function carregarMetas() {
+      const resposta = await fetch('/metas')
+      const metas = await resposta.json()
+      const container = document.getElementById('listaMetasContainer')
+      container.innerHTML = metas.map(m => `
+        <div class="meta-card">
+          <div class="meta-titulo">${m.titulo}</div>
+          ${m.descricao ? `<div class="meta-desc">${m.descricao}</div>` : ''}
+          ${m.categoria ? `<span class="meta-categoria">${m.categoria}</span>` : ''}
+        </div>
+      `).join('')
+    }
+
+    async function gerarAnalise() {
+      const div = document.getElementById('analiseResultado')
+      div.style.display = 'block'
+      div.textContent = 'Analisando...'
+      const resposta = await fetch('/analise')
+      const dados = await resposta.json()
+      div.innerHTML = dados.conteudo
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\n/g, '<br>')
+    }
+
+    carregarDiario()
+    carregarMetas()
     async function carregarEventos() {
       const resposta = await fetch('/eventos')
       eventos = await resposta.json()

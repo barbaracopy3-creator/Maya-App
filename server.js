@@ -219,6 +219,95 @@ cron.schedule('0 20 * * 0', () => {
 })
 
 const PORT = process.env.PORT || 3000
+// Busca entradas do diário
+app.get('/diario', async (req, res) => {
+  const { data, error } = await supabase
+    .from('diario')
+    .select('*')
+    .order('data', { ascending: false })
+    .limit(30)
+  if (error) return res.status(500).json({ erro: error.message })
+  res.json(data)
+})
+
+// Salva entrada do diário
+app.post('/diario', async (req, res) => {
+  const { conteudo, humor, data } = req.body
+  const { error } = await supabase
+    .from('diario')
+    .insert({ conteudo, humor, data })
+  if (error) return res.status(500).json({ erro: error.message })
+  res.json({ ok: true })
+})
+
+// Busca metas
+app.get('/metas', async (req, res) => {
+  const { data, error } = await supabase
+    .from('metas')
+    .select('*')
+    .eq('ativa', true)
+    .order('criado_em', { ascending: true })
+  if (error) return res.status(500).json({ erro: error.message })
+  res.json(data)
+})
+
+// Salva meta nova
+app.post('/metas', async (req, res) => {
+  const { titulo, descricao, categoria, prazo } = req.body
+  const { error } = await supabase
+    .from('metas')
+    .insert({ titulo, descricao, categoria, prazo })
+  if (error) return res.status(500).json({ erro: error.message })
+  res.json({ ok: true })
+})
+
+// Atualiza análise de alinhamento no relatório
+app.get('/analise', async (req, res) => {
+  const { data: metas } = await supabase
+    .from('metas')
+    .select('*')
+    .eq('ativa', true)
+
+  const { data: eventos } = await supabase
+    .from('events')
+    .select('*')
+    .gte('data', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
+
+  const { data: diario } = await supabase
+    .from('diario')
+    .select('*')
+    .order('data', { ascending: false })
+    .limit(7)
+
+  if (!metas || metas.length === 0) {
+    return res.json({ conteudo: 'Cadastre suas metas primeiro para eu poder analisar seu alinhamento.' })
+  }
+
+  const resposta = await openai.chat.completions.create({
+    model: 'gpt-4o',
+    messages: [
+      {
+        role: 'system',
+        content: `Você é a Maya, assistente pessoal inteligente e direta.
+Analise se a rotina da usuária está alinhada com suas metas.
+Seja honesta, empática e prática. Máximo 250 palavras.
+Estruture assim:
+🎯 ALINHAMENTO — nota de 1 a 10 e por quê
+✅ O QUE ESTÁ FUNCIONANDO — o que na rotina contribui para as metas
+⚠️ PONTO DE ATENÇÃO — onde há desconexão entre rotina e metas
+💡 AÇÃO DA SEMANA — uma coisa concreta para fazer essa semana`
+        },
+        {
+          role: 'user',
+          content: `Minhas metas: ${JSON.stringify(metas)}
+Minha rotina essa semana: ${JSON.stringify(eventos)}
+Meu diário recente: ${JSON.stringify(diario)}`
+        }
+      ]
+  })
+
+  res.json({ conteudo: resposta.choices[0].message.content })
+})
 app.listen(PORT, () => {
   console.log(`Maya rodando em http://localhost:${PORT}`)
 })
