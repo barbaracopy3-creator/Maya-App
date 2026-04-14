@@ -380,37 +380,78 @@
       messages.scrollTop = messages.scrollHeight
     }
 
-    async function sendMessage() {
-      const text = inputField.value.trim()
-      if (!text) return
-      addBubble(text, 'user')
-      inputField.value = ''
-      addBubble('...', 'maya')
-      try {
-        const resposta = await fetch('/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ mensagem: text, eventos })
-        })
-        const dados = await resposta.json()
-        messages.lastChild.remove()
-        if (dados.conflito) {
-          addBubble(`⚠️ ${dados.mensagem_conflito}`, 'maya')
-          return
-        }
-        if (dados.lista) {
-          eventos.push(...dados.lista)
-          dados.lista.forEach(ev => agendarAlerta(ev))
-        }
-        addBubble(dados.confirmacao, 'maya')
-        buildCalendar()
-      } catch (erro) {
-        messages.lastChild.remove()
-        addBubble('Ops, algo deu errado. Tenta de novo.', 'maya')
-        console.error(erro)
-      }
+async function sendMessage() {
+  const text = inputField.value.trim()
+  if (!text) return
+  addBubble(text, 'user')
+  inputField.value = ''
+  addBubble('...', 'maya')
+  try {
+    const resposta = await fetch('/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mensagem: text, eventos })
+    })
+    const dados = await resposta.json()
+    messages.lastChild.remove()
+
+    if (dados.conflito) {
+      addBubble(`⚠️ ${dados.mensagem_conflito}`, 'maya')
+      return
     }
 
+    if (dados.tipo === 'delete') {
+      const evento = eventos.find(ev =>
+        ev.titulo.toLowerCase().includes(dados.titulo.toLowerCase())
+      )
+      if (evento) {
+        await deletarEvento(evento.id)
+        addBubble(dados.confirmacao, 'maya')
+      } else {
+        addBubble('Não encontrei esse evento na agenda.', 'maya')
+      }
+      return
+    }
+
+    if (dados.tipo === 'editar') {
+      const evento = eventos.find(ev =>
+        ev.titulo.toLowerCase().includes(dados.titulo_original.toLowerCase())
+      )
+      if (evento) {
+        await fetch(`/eventos/${evento.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            titulo: dados.titulo,
+            data: dados.data,
+            hora: dados.hora
+          })
+        })
+        evento.titulo = dados.titulo
+        evento.data = dados.data
+        evento.hora = dados.hora
+        addBubble(dados.confirmacao, 'maya')
+        buildCalendar()
+      } else {
+        addBubble('Não encontrei esse evento na agenda.', 'maya')
+      }
+      return
+    }
+
+    if (dados.lista) {
+      eventos.push(...dados.lista)
+      dados.lista.forEach(ev => agendarAlerta(ev))
+    }
+
+    addBubble(dados.confirmacao, 'maya')
+    buildCalendar()
+
+  } catch (erro) {
+    messages.lastChild.remove()
+    addBubble('Ops, algo deu errado. Tenta de novo.', 'maya')
+    console.error(erro)
+  }
+}
     function buildCalendar() {
       const grid = document.getElementById('weekGrid')
       const weekRange = document.getElementById('weekRange')

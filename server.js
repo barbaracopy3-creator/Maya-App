@@ -20,9 +20,43 @@ app.get('/eventos', async (req, res) => {
     .from('events')
     .select('*')
     .order('data', { ascending: true })
-
   if (error) return res.status(500).json({ erro: error.message })
   res.json(data)
+})
+
+// Deleta evento
+app.delete('/eventos/:id', async (req, res) => {
+  const { id } = req.params
+  const { error } = await supabase
+    .from('events')
+    .delete()
+    .eq('id', id)
+  if (error) return res.status(500).json({ erro: error.message })
+  res.json({ ok: true })
+})
+
+// Marca como feito/não feito
+app.patch('/eventos/:id', async (req, res) => {
+  const { id } = req.params
+  const { feito } = req.body
+  const { error } = await supabase
+    .from('events')
+    .update({ feito })
+    .eq('id', id)
+  if (error) return res.status(500).json({ erro: error.message })
+  res.json({ ok: true })
+})
+
+// Edita evento
+app.put('/eventos/:id', async (req, res) => {
+  const { id } = req.params
+  const { titulo, data, hora } = req.body
+  const { error } = await supabase
+    .from('events')
+    .update({ titulo, data, hora })
+    .eq('id', id)
+  if (error) return res.status(500).json({ erro: error.message })
+  res.json({ ok: true })
 })
 
 // Recebe mensagem, chama IA, salva no banco
@@ -62,7 +96,10 @@ ${JSON.stringify(eventos || [])}
 Se houver conflito (menos de 30 min de diferença), adicione "conflito": true e "mensagem_conflito": "explicação e sugestão"
 
 Se o usuário quiser apagar, deletar ou remover um evento, retorne:
-{"tipo":"delete","titulo":"nome do evento que quer apagar","confirmacao":"mensagem confirmando"}`
+{"tipo":"delete","titulo":"nome do evento que quer apagar","confirmacao":"mensagem confirmando"}
+
+Se o usuário quiser editar, mudar, alterar ou remarcar um evento, retorne:
+{"tipo":"editar","titulo_original":"nome atual do evento","titulo":"novo nome ou mesmo nome","data":"YYYY-MM-DD","hora":"HH:MM","confirmacao":"mensagem confirmando a alteração"}`
         },
         { role: 'user', content: mensagem }
       ]
@@ -70,11 +107,13 @@ Se o usuário quiser apagar, deletar ou remover um evento, retorne:
 
     const texto = resposta.choices[0].message.content
     const dados = JSON.parse(texto)
-
-    // Normaliza — transforma objeto único em array para tratar tudo igual
     const lista = Array.isArray(dados) ? dados : [dados]
 
-    // Verifica conflito em qualquer item da lista
+    // Trata delete e editar antes de salvar
+    if (lista[0].tipo === 'delete' || lista[0].tipo === 'editar') {
+      return res.json(lista[0])
+    }
+
     const conflito = lista.find(ev => ev.conflito)
     if (conflito) {
       return res.json({
@@ -83,7 +122,6 @@ Se o usuário quiser apagar, deletar ou remover um evento, retorne:
       })
     }
 
-    // Salva todos os eventos no Supabase
     const { error } = await supabase.from('events').insert(
       lista.map(ev => ({
         titulo: ev.titulo,
@@ -95,7 +133,6 @@ Se o usuário quiser apagar, deletar ou remover um evento, retorne:
 
     if (error) throw error
 
-    // Retorna confirmação do primeiro evento (os outros são silenciosos)
     res.json({
       lista,
       confirmacao: lista[0].confirmacao,
@@ -108,8 +145,7 @@ Se o usuário quiser apagar, deletar ou remover um evento, retorne:
   }
 })
 
-const PORT = process.env.PORT || 3000
-// Rota para buscar relatórios salvos
+// Busca relatórios salvos
 app.get('/relatorios', async (req, res) => {
   const { data, error } = await supabase
     .from('relatorios')
@@ -120,13 +156,12 @@ app.get('/relatorios', async (req, res) => {
   res.json(data)
 })
 
-// Função que gera o relatório semanal
+// Gera relatório semanal
 async function gerarRelatorio() {
   const hoje = new Date()
   const semanaPassada = new Date(hoje)
   semanaPassada.setDate(hoje.getDate() - 7)
 
-  // Busca eventos da última semana
   const { data: eventos } = await supabase
     .from('events')
     .select('*')
@@ -135,7 +170,6 @@ async function gerarRelatorio() {
 
   if (!eventos || eventos.length === 0) return
 
-  // Manda para o GPT analisar — usa gpt-4o para análise profunda
   const resposta = await openai.chat.completions.create({
     model: 'gpt-4o',
     messages: [
@@ -160,7 +194,6 @@ Seja direta, amigável e use no máximo 200 palavras. Fale como se estivesse con
 
   const conteudo = resposta.choices[0].message.content
 
-  // Salva o relatório no banco
   await supabase.from('relatorios').insert({
     semana_inicio: semanaPassada.toISOString().split('T')[0],
     semana_fim: hoje.toISOString().split('T')[0],
@@ -171,7 +204,7 @@ Seja direta, amigável e use no máximo 200 palavras. Fale como se estivesse con
   return conteudo
 }
 
-// Rota para gerar relatório manualmente (para testar)
+// Rota para gerar relatório manualmente
 app.get('/gerar-relatorio', async (req, res) => {
   const conteudo = await gerarRelatorio()
   res.json({ conteudo })
@@ -184,29 +217,8 @@ cron.schedule('0 20 * * 0', () => {
 }, {
   timezone: 'America/Sao_Paulo'
 })
-app.get('/icon-192.png', (req, res) => {
-  const { createCanvas } = require('canvas')
-  res.redirect('https://via.placeholder.com/192x192/A0A0A0/FFFFFF?text=M')
-})
-app.delete('/eventos/:id', async (req, res) => {
-  const { id } = req.params
-  const { error } = await supabase
-    .from('events')
-    .delete()
-    .eq('id', id)
-  if (error) return res.status(500).json({ erro: error.message })
-  res.json({ ok: true })
-})
-app.patch('/eventos/:id', async (req, res) => {
-  const { id } = req.params
-  const { feito } = req.body
-  const { error } = await supabase
-    .from('events')
-    .update({ feito })
-    .eq('id', id)
-  if (error) return res.status(500).json({ erro: error.message })
-  res.json({ ok: true })
-})
+
+const PORT = process.env.PORT || 3000
 app.listen(PORT, () => {
   console.log(`Maya rodando em http://localhost:${PORT}`)
 })
