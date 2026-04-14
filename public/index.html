@@ -10,6 +10,25 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Maya">
   <style>
+    .event-pill.feito {
+  opacity: 0.45;
+  text-decoration: line-through;
+}
+
+.pill-check {
+  margin-right: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  color: #AEAEB2;
+}
+
+.pill-check:hover {
+  color: #34C759;
+}
+
+.pill-check.checked {
+  color: #34C759;
+}
     .pill-delete {
   margin-left: 4px;
   color: #AEAEB2;
@@ -296,6 +315,16 @@
   </div>
 
   <script>
+    async function toggleFeito(id, feito) {
+  await fetch(`/eventos/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ feito })
+  })
+  const ev = eventos.find(e => e.id === id)
+  if (ev) ev.feito = feito
+  buildCalendar()
+}
     async function deletarEvento(id) {
   await fetch(`/eventos/${id}`, { method: 'DELETE' })
   eventos = eventos.filter(ev => ev.id !== id)
@@ -416,20 +445,41 @@
         eventosDoDia.forEach(ev => {
   const pill = document.createElement('div')
   pill.classList.add('event-pill', ev.tipo)
-  if (ev.hora) {
-    pill.innerHTML = `<span class="pill-time">${ev.hora}</span>${ev.titulo} <span class="pill-delete">×</span>`
-  } else {
-    pill.innerHTML = `${ev.titulo} <span class="pill-delete">×</span>`
-  }
-  pill.querySelector('.pill-delete').addEventListener('click', (e) => {
+  if (ev.feito) pill.classList.add('feito')
+
+  const check = document.createElement('span')
+  check.classList.add('pill-check')
+  check.textContent = ev.feito ? '✓' : '○'
+  if (ev.feito) check.classList.add('checked')
+  check.addEventListener('click', (e) => {
+    e.stopPropagation()
+    toggleFeito(ev.id, !ev.feito)
+  })
+
+  const deleteBtn = document.createElement('span')
+  deleteBtn.classList.add('pill-delete')
+  deleteBtn.textContent = '×'
+  deleteBtn.addEventListener('click', (e) => {
     e.stopPropagation()
     deletarEvento(ev.id)
   })
+
+  const conteudo = document.createElement('span')
+  if (ev.hora) {
+    conteudo.innerHTML = `<span class="pill-time">${ev.hora}</span>${ev.titulo}`
+  } else {
+    conteudo.textContent = ev.titulo
+  }
+
+  pill.appendChild(check)
+  pill.appendChild(conteudo)
+  pill.appendChild(deleteBtn)
   coluna.appendChild(pill)
-})
-        grid.appendChild(coluna)
-      }
+      })
+
+      grid.appendChild(coluna)
     }
+  }
 
     async function carregarRelatorio() {
       try {

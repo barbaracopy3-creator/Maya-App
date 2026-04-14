@@ -197,6 +197,16 @@ app.delete('/eventos/:id', async (req, res) => {
   if (error) return res.status(500).json({ erro: error.message })
   res.json({ ok: true })
 })
+app.patch('/eventos/:id', async (req, res) => {
+  const { id } = req.params
+  const { feito } = req.body
+  const { error } = await supabase
+    .from('events')
+    .update({ feito })
+    .eq('id', id)
+  if (error) return res.status(500).json({ erro: error.message })
+  res.json({ ok: true })
+})
 app.listen(PORT, () => {
   console.log(`Maya rodando em http://localhost:${PORT}`)
 })
