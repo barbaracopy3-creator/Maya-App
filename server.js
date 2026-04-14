@@ -14,7 +14,7 @@ app.use(cors())
 app.use(express.json())
 app.use(express.static('public'))
 
-// Busca todos os eventos do banco
+// Busca todos os eventos
 app.get('/eventos', async (req, res) => {
   const { data, error } = await supabase
     .from('events')
@@ -27,22 +27,16 @@ app.get('/eventos', async (req, res) => {
 // Deleta evento
 app.delete('/eventos/:id', async (req, res) => {
   const { id } = req.params
-  const { error } = await supabase
-    .from('events')
-    .delete()
-    .eq('id', id)
+  const { error } = await supabase.from('events').delete().eq('id', id)
   if (error) return res.status(500).json({ erro: error.message })
   res.json({ ok: true })
 })
 
-// Marca como feito/não feito
+// Marca como feito
 app.patch('/eventos/:id', async (req, res) => {
   const { id } = req.params
   const { feito } = req.body
-  const { error } = await supabase
-    .from('events')
-    .update({ feito })
-    .eq('id', id)
+  const { error } = await supabase.from('events').update({ feito }).eq('id', id)
   if (error) return res.status(500).json({ erro: error.message })
   res.json({ ok: true })
 })
@@ -51,17 +45,21 @@ app.patch('/eventos/:id', async (req, res) => {
 app.put('/eventos/:id', async (req, res) => {
   const { id } = req.params
   const { titulo, data, hora } = req.body
-  const { error } = await supabase
-    .from('events')
-    .update({ titulo, data, hora })
-    .eq('id', id)
+  const { error } = await supabase.from('events').update({ titulo, data, hora }).eq('id', id)
   if (error) return res.status(500).json({ erro: error.message })
   res.json({ ok: true })
 })
 
-// Recebe mensagem, chama IA, salva no banco
+// Chat principal
 app.post('/chat', async (req, res) => {
   const { mensagem, eventos } = req.body
+
+  const { data: metas } = await supabase
+    .from('metas').select('*').eq('ativa', true)
+
+  const { data: diarioRecente } = await supabase
+    .from('diario').select('*')
+    .order('data', { ascending: false }).limit(5)
 
   try {
     const resposta = await openai.chat.completions.create({
@@ -69,13 +67,13 @@ app.post('/chat', async (req, res) => {
       messages: [
         {
           role: 'system',
-          content: `Você é a Maya, assistente de agenda inteligente.
+          content: `Você é a Maya, assistente pessoal inteligente.
 
 Analise a mensagem e retorne SEMPRE um JSON puro, sem texto extra.
 
 REGRAS:
 - Se for um evento único: retorna um objeto
-- Se for recorrente (ex: "toda segunda", "segunda e terça", "todo dia"): retorna um ARRAY de objetos, um para cada dia
+- Se for recorrente (ex: "toda segunda", "segunda e terça", "todo dia"): retorna um ARRAY de objetos
 - Extraia: titulo, tipo (evento ou tarefa), data (YYYY-MM-DD), hora (HH:MM ou null), confirmacao
 - Datas relativas: hoje é ${new Date().toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
 - Para dias da semana como "segunda e terça", calcule as próximas ocorrências
@@ -89,7 +87,6 @@ FORMATO recorrente (array):
   {"tipo":"evento","titulo":"nome","data":"YYYY-MM-DD","hora":"HH:MM","confirmacao":"mensagem amigável"},
   {"tipo":"evento","titulo":"nome","data":"YYYY-MM-DD","hora":"HH:MM","confirmacao":""}
 ]
-Só o primeiro objeto do array precisa ter a confirmacao preenchida, os outros deixa vazio.
 
 CONFLITOS: eventos existentes na agenda:
 ${JSON.stringify(eventos || [])}
@@ -99,7 +96,14 @@ Se o usuário quiser apagar, deletar ou remover um evento, retorne:
 {"tipo":"delete","titulo":"nome do evento que quer apagar","confirmacao":"mensagem confirmando"}
 
 Se o usuário quiser editar, mudar, alterar ou remarcar um evento, retorne:
-{"tipo":"editar","titulo_original":"nome atual do evento","titulo":"novo nome ou mesmo nome","data":"YYYY-MM-DD","hora":"HH:MM","confirmacao":"mensagem confirmando a alteração"}`
+{"tipo":"editar","titulo_original":"nome atual do evento","titulo":"novo nome ou mesmo nome","data":"YYYY-MM-DD","hora":"HH:MM","confirmacao":"mensagem confirmando a alteração"}
+
+Se o usuário fizer uma pergunta pessoal sobre metas, progresso, rotina ou pedir conselhos (ex: "estou no caminho certo?", "o que devo fazer essa semana?", "como posso melhorar?"), retorne:
+{"tipo":"reflexao","confirmacao":"resposta honesta, empática e prática baseada nas metas e diário da usuária"}
+
+CONTEXTO PESSOAL DA USUÁRIA:
+${metas && metas.length > 0 ? `Metas: ${JSON.stringify(metas)}` : 'Sem metas cadastradas ainda.'}
+${diarioRecente && diarioRecente.length > 0 ? `Diário recente: ${JSON.stringify(diarioRecente)}` : ''}`
         },
         { role: 'user', content: mensagem }
       ]
@@ -109,17 +113,13 @@ Se o usuário quiser editar, mudar, alterar ou remarcar um evento, retorne:
     const dados = JSON.parse(texto)
     const lista = Array.isArray(dados) ? dados : [dados]
 
-    // Trata delete e editar antes de salvar
-    if (lista[0].tipo === 'delete' || lista[0].tipo === 'editar') {
+    if (lista[0].tipo === 'delete' || lista[0].tipo === 'editar' || lista[0].tipo === 'reflexao') {
       return res.json(lista[0])
     }
 
     const conflito = lista.find(ev => ev.conflito)
     if (conflito) {
-      return res.json({
-        conflito: true,
-        mensagem_conflito: conflito.mensagem_conflito
-      })
+      return res.json({ conflito: true, mensagem_conflito: conflito.mensagem_conflito })
     }
 
     const { error } = await supabase.from('events').insert(
@@ -133,11 +133,7 @@ Se o usuário quiser editar, mudar, alterar ou remarcar um evento, retorne:
 
     if (error) throw error
 
-    res.json({
-      lista,
-      confirmacao: lista[0].confirmacao,
-      tipo: lista[0].tipo
-    })
+    res.json({ lista, confirmacao: lista[0].confirmacao, tipo: lista[0].tipo })
 
   } catch (erro) {
     console.error('Erro:', erro)
@@ -145,28 +141,33 @@ Se o usuário quiser editar, mudar, alterar ou remarcar um evento, retorne:
   }
 })
 
-// Busca relatórios salvos
+// Busca relatórios
 app.get('/relatorios', async (req, res) => {
   const { data, error } = await supabase
-    .from('relatorios')
-    .select('*')
-    .order('criado_em', { ascending: false })
-    .limit(4)
+    .from('relatorios').select('*')
+    .order('criado_em', { ascending: false }).limit(4)
   if (error) return res.status(500).json({ erro: error.message })
   res.json(data)
 })
 
-// Gera relatório semanal
+// Gera relatório semanal completo
 async function gerarRelatorio() {
   const hoje = new Date()
   const semanaPassada = new Date(hoje)
   semanaPassada.setDate(hoje.getDate() - 7)
 
   const { data: eventos } = await supabase
-    .from('events')
-    .select('*')
+    .from('events').select('*')
     .gte('data', semanaPassada.toISOString().split('T')[0])
     .lte('data', hoje.toISOString().split('T')[0])
+
+  const { data: metas } = await supabase
+    .from('metas').select('*').eq('ativa', true)
+
+  const { data: diario } = await supabase
+    .from('diario').select('*')
+    .gte('data', semanaPassada.toISOString().split('T')[0])
+    .order('data', { ascending: false })
 
   if (!eventos || eventos.length === 0) return
 
@@ -175,19 +176,23 @@ async function gerarRelatorio() {
     messages: [
       {
         role: 'system',
-        content: `Você é a Maya, assistente pessoal inteligente.
-Analise os eventos da semana e gere um relatório em português com:
+        content: `Você é a Maya, assistente pessoal inteligente e direta.
+Analise a semana completa e gere um relatório integrado em português com:
 
 1. RESUMO DA SEMANA — o que foi feito em 2-3 frases
-2. DISTRIBUIÇÃO DE TEMPO — quais categorias de atividade mais apareceram
-3. PADRÕES — algo que você notou (ex: muitas reuniões pela manhã, tarefas acumulando)
-4. SUGESTÃO — uma dica prática para a próxima semana
+2. DISTRIBUIÇÃO DE TEMPO — quais categorias mais apareceram
+3. ALINHAMENTO COM METAS — nota de 1 a 10 e análise honesta
+4. PADRÃO DA SEMANA — algo que você notou
+5. AÇÃO PRIORITÁRIA — uma coisa concreta para a próxima semana
 
-Seja direta, amigável e use no máximo 200 palavras. Fale como se estivesse conversando.`
+Seja direta, empática e use no máximo 300 palavras.
+${metas && metas.length > 0 ? 'Considere as metas na análise.' : ''}`
       },
       {
         role: 'user',
-        content: `Eventos da semana: ${JSON.stringify(eventos)}`
+        content: `Eventos: ${JSON.stringify(eventos)}
+${metas && metas.length > 0 ? `Metas: ${JSON.stringify(metas)}` : ''}
+${diario && diario.length > 0 ? `Diário: ${JSON.stringify(diario)}` : ''}`
       }
     ]
   })
@@ -200,11 +205,11 @@ Seja direta, amigável e use no máximo 200 palavras. Fale como se estivesse con
     conteudo
   })
 
-  console.log('Relatório semanal gerado')
+  console.log('Relatório gerado')
   return conteudo
 }
 
-// Rota para gerar relatório manualmente
+// Rota manual para relatório
 app.get('/gerar-relatorio', async (req, res) => {
   const conteudo = await gerarRelatorio()
   res.json({ conteudo })
@@ -212,72 +217,48 @@ app.get('/gerar-relatorio', async (req, res) => {
 
 // Agenda relatório todo domingo às 20h
 cron.schedule('0 20 * * 0', () => {
-  console.log('Gerando relatório semanal...')
   gerarRelatorio()
-}, {
-  timezone: 'America/Sao_Paulo'
-})
+}, { timezone: 'America/Sao_Paulo' })
 
-const PORT = process.env.PORT || 3000
-// Busca entradas do diário
+// Diário
 app.get('/diario', async (req, res) => {
   const { data, error } = await supabase
-    .from('diario')
-    .select('*')
-    .order('data', { ascending: false })
-    .limit(30)
+    .from('diario').select('*')
+    .order('data', { ascending: false }).limit(30)
   if (error) return res.status(500).json({ erro: error.message })
   res.json(data)
 })
 
-// Salva entrada do diário
 app.post('/diario', async (req, res) => {
   const { conteudo, humor, data } = req.body
-  const { error } = await supabase
-    .from('diario')
-    .insert({ conteudo, humor, data })
+  const { error } = await supabase.from('diario').insert({ conteudo, humor, data })
   if (error) return res.status(500).json({ erro: error.message })
   res.json({ ok: true })
 })
 
-// Busca metas
+// Metas
 app.get('/metas', async (req, res) => {
   const { data, error } = await supabase
-    .from('metas')
-    .select('*')
-    .eq('ativa', true)
+    .from('metas').select('*').eq('ativa', true)
     .order('criado_em', { ascending: true })
   if (error) return res.status(500).json({ erro: error.message })
   res.json(data)
 })
 
-// Salva meta nova
 app.post('/metas', async (req, res) => {
   const { titulo, descricao, categoria, prazo } = req.body
-  const { error } = await supabase
-    .from('metas')
-    .insert({ titulo, descricao, categoria, prazo })
+  const { error } = await supabase.from('metas').insert({ titulo, descricao, categoria, prazo })
   if (error) return res.status(500).json({ erro: error.message })
   res.json({ ok: true })
 })
 
-// Atualiza análise de alinhamento no relatório
+// Análise de alinhamento
 app.get('/analise', async (req, res) => {
-  const { data: metas } = await supabase
-    .from('metas')
-    .select('*')
-    .eq('ativa', true)
-
-  const { data: eventos } = await supabase
-    .from('events')
-    .select('*')
+  const { data: metas } = await supabase.from('metas').select('*').eq('ativa', true)
+  const { data: eventos } = await supabase.from('events').select('*')
     .gte('data', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
-
-  const { data: diario } = await supabase
-    .from('diario')
-    .select('*')
-    .order('data', { ascending: false })
-    .limit(7)
+  const { data: diario } = await supabase.from('diario').select('*')
+    .order('data', { ascending: false }).limit(7)
 
   if (!metas || metas.length === 0) {
     return res.json({ conteudo: 'Cadastre suas metas primeiro para eu poder analisar seu alinhamento.' })
@@ -289,25 +270,27 @@ app.get('/analise', async (req, res) => {
       {
         role: 'system',
         content: `Você é a Maya, assistente pessoal inteligente e direta.
-Analise se a rotina da usuária está alinhada com suas metas.
+Analise se a rotina está alinhada com as metas.
 Seja honesta, empática e prática. Máximo 250 palavras.
 Estruture assim:
 🎯 ALINHAMENTO — nota de 1 a 10 e por quê
-✅ O QUE ESTÁ FUNCIONANDO — o que na rotina contribui para as metas
-⚠️ PONTO DE ATENÇÃO — onde há desconexão entre rotina e metas
-💡 AÇÃO DA SEMANA — uma coisa concreta para fazer essa semana`
-        },
-        {
-          role: 'user',
-          content: `Minhas metas: ${JSON.stringify(metas)}
-Minha rotina essa semana: ${JSON.stringify(eventos)}
-Meu diário recente: ${JSON.stringify(diario)}`
-        }
-      ]
+✅ O QUE ESTÁ FUNCIONANDO
+⚠️ PONTO DE ATENÇÃO
+💡 AÇÃO DA SEMANA`
+      },
+      {
+        role: 'user',
+        content: `Metas: ${JSON.stringify(metas)}
+Rotina essa semana: ${JSON.stringify(eventos)}
+Diário recente: ${JSON.stringify(diario)}`
+      }
+    ]
   })
 
   res.json({ conteudo: resposta.choices[0].message.content })
 })
+
+const PORT = process.env.PORT || 3000
 app.listen(PORT, () => {
   console.log(`Maya rodando em http://localhost:${PORT}`)
 })
