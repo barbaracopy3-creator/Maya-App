@@ -421,7 +421,8 @@
       grid.innerHTML = ''
       const hoje = new Date()
       const domingo = new Date(hoje)
-      domingo.setDate(hoje.getDate() - hoje.getDay() + offsetSemana * 7)
+      domingo.setDate(hoje.getDate() - hoje.getDay() + (offsetSemana * 7))
+      domingo.setHours(0, 0, 0, 0)
       const sabado = new Date(domingo)
       sabado.setDate(domingo.getDate() + 6)
       title.textContent = `${domingo.getDate()} ${meses[domingo.getMonth()]} – ${sabado.getDate()} ${meses[sabado.getMonth()]}`
