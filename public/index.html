@@ -10,517 +10,159 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Maya">
   <style>
-    .tabs {
-      display: flex;
-      border-bottom: 0.5px solid rgba(0,0,0,0.08);
-      background: white;
-      padding: 0 24px;
-    }
-
-    .tab {
-      font-size: 13px;
-      font-weight: 500;
-      color: #8A8A8E;
-      padding: 10px 16px;
-      cursor: pointer;
-      border-bottom: 2px solid transparent;
-      margin-bottom: -0.5px;
-    }
-
-    .tab.active {
-      color: #1C1C1E;
-      border-bottom-color: #A0A0A0;
-    }
-
-    .tab-content {
-      display: none;
-      flex: 1;
-      overflow-y: auto;
-    }
-
-    .tab-content.active {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .diario-section {
-      padding: 20px 24px;
-    }
-
-    .humor-row {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    .humor-btn {
-      font-size: 20px;
-      background: none;
-      border: 0.5px solid rgba(0,0,0,0.08);
-      border-radius: 10px;
-      padding: 6px 10px;
-      cursor: pointer;
-      opacity: 0.4;
-      transition: opacity 0.15s;
-    }
-
-    .humor-btn.selected {
-      opacity: 1;
-      background: #F2F2F7;
-    }
-
-    .diario-textarea {
-      width: 100%;
-      border: 0.5px solid rgba(0,0,0,0.12);
-      border-radius: 12px;
-      padding: 12px 14px;
-      font-size: 14px;
-      font-family: inherit;
-      outline: none;
-      resize: none;
-      background: #F2F2F7;
-      color: #1C1C1E;
-      min-height: 120px;
-      line-height: 1.6;
-    }
-
-    .diario-save-btn {
-      margin-top: 10px;
-      background: #A0A0A0;
-      color: white;
-      border: none;
-      border-radius: 22px;
-      padding: 10px 20px;
-      font-size: 14px;
-      font-family: inherit;
-      cursor: pointer;
-      align-self: flex-end;
-    }
-
-    .diario-entry {
-      background: white;
-      border: 0.5px solid rgba(0,0,0,0.08);
-      border-radius: 12px;
-      padding: 12px 14px;
-      margin-top: 10px;
-    }
-
-    .diario-entry-date {
-      font-size: 11px;
-      color: #8A8A8E;
-      margin-bottom: 6px;
-    }
-
-    .diario-entry-text {
-      font-size: 13px;
-      color: #1C1C1E;
-      line-height: 1.5;
-    }
-
-    .metas-section {
-      padding: 20px 24px;
-    }
-
-    .meta-card {
-      background: white;
-      border: 0.5px solid rgba(0,0,0,0.08);
-      border-radius: 12px;
-      padding: 12px 14px;
-      margin-bottom: 8px;
-    }
-
-    .meta-titulo {
-      font-size: 14px;
-      font-weight: 500;
-      color: #1C1C1E;
-    }
-
-    .meta-desc {
-      font-size: 12px;
-      color: #8A8A8E;
-      margin-top: 3px;
-    }
-
-    .meta-categoria {
-      font-size: 10px;
-      padding: 2px 8px;
-      border-radius: 10px;
-      background: #F2F2F7;
-      color: #636366;
-      display: inline-block;
-      margin-top: 6px;
-    }
-
-    .add-meta-form {
-      background: #F2F2F7;
-      border-radius: 12px;
-      padding: 14px;
-      margin-bottom: 16px;
-    }
-
-    .add-meta-form input,
-    .add-meta-form select {
-      width: 100%;
-      border: 0.5px solid rgba(0,0,0,0.12);
-      border-radius: 8px;
-      padding: 8px 12px;
-      font-size: 13px;
-      font-family: inherit;
-      outline: none;
-      background: white;
-      color: #1C1C1E;
-      margin-bottom: 8px;
-    }
-
-    .add-meta-btn {
-      background: #A0A0A0;
-      color: white;
-      border: none;
-      border-radius: 20px;
-      padding: 8px 18px;
-      font-size: 13px;
-      font-family: inherit;
-      cursor: pointer;
-    }
-
-    .analise-btn {
-      margin: 0 24px 12px;
-      background: white;
-      border: 0.5px solid rgba(0,0,0,0.12);
-      border-radius: 22px;
-      padding: 10px 20px;
-      font-size: 13px;
-      font-family: inherit;
-      cursor: pointer;
-      color: #1C1C1E;
-      width: calc(100% - 48px);
-    }
-
-    .analise-resultado {
-      margin: 0 24px;
-      background: white;
-      border: 0.5px solid rgba(0,0,0,0.08);
-      border-radius: 12px;
-      padding: 14px 16px;
-      font-size: 13px;
-      color: #1C1C1E;
-      line-height: 1.7;
-      white-space: pre-wrap;
-    }
-    .event-pill.feito {
-  opacity: 0.45;
-  text-decoration: line-through;
-}
-
-.pill-check {
-  margin-right: 4px;
-  cursor: pointer;
-  font-size: 11px;
-  color: #AEAEB2;
-}
-
-.pill-check:hover {
-  color: #34C759;
-}
-
-.pill-check.checked {
-  color: #34C759;
-}
-    .pill-delete {
-  margin-left: 4px;
-  color: #AEAEB2;
-  cursor: pointer;
-  font-size: 12px;
-}
-
-.pill-delete:hover {
-  color: #FF3B30;
-}
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #FAFAFA;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-
-    .header {
-      padding: 20px 24px 16px;
-      border-bottom: 0.5px solid rgba(0,0,0,0.08);
-      background: white;
-    }
-
-    .header h1 {
-      font-size: 22px;
-      font-weight: 600;
-      color: #1C1C1E;
-      letter-spacing: -0.3px;
-    }
-
-    .header p {
-      font-size: 13px;
-      color: #8A8A8E;
-      margin-top: 2px;
-    }
-
-    .messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      min-height: 200px;
-    }
-
-    .bubble {
-      max-width: 80%;
-      padding: 10px 14px;
-      border-radius: 18px;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-
-    .bubble.user {
-      background: #A0A0A0;
-      color: white;
-      align-self: flex-end;
-      border-bottom-right-radius: 4px;
-    }
-
-    .bubble.maya {
-      background: white;
-      color: #1C1C1E;
-      align-self: flex-start;
-      border: 0.5px solid rgba(0,0,0,0.08);
-      border-bottom-left-radius: 4px;
-    }
-
-    .input-area {
-      padding: 12px 24px 24px;
-      background: white;
-      border-top: 0.5px solid rgba(0,0,0,0.08);
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .input-area input {
-      flex: 1;
-      border: 0.5px solid rgba(0,0,0,0.12);
-      border-radius: 22px;
-      padding: 10px 16px;
-      font-size: 14px;
-      font-family: inherit;
-      outline: none;
-      background: #F2F2F7;
-      color: #1C1C1E;
-    }
-
+    body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #FAFAFA; display: flex; flex-direction: column; min-height: 100vh; }
+    .header { padding: 20px 24px 16px; border-bottom: 0.5px solid rgba(0,0,0,0.08); background: white; display: flex; justify-content: space-between; align-items: flex-start; }
+    .header h1 { font-size: 22px; font-weight: 600; color: #1C1C1E; letter-spacing: -0.3px; }
+    .header p { font-size: 13px; color: #8A8A8E; margin-top: 2px; }
+    .header-right { display: flex; gap: 8px; align-items: center; }
+    .foco-badge { font-size: 11px; padding: 4px 10px; border-radius: 20px; background: #F2F2F7; color: #636366; cursor: pointer; border: 0.5px solid rgba(0,0,0,0.08); display: none; }
+    .foco-badge.visivel { display: block; }
+    .foco-banner { background: #1C1C1E; color: white; padding: 12px 24px; font-size: 13px; display: none; align-items: center; justify-content: space-between; gap: 12px; }
+    .foco-banner.visivel { display: flex; }
+    .foco-banner-text { line-height: 1.4; }
+    .foco-banner-text strong { font-weight: 500; }
+    .foco-banner-btn { font-size: 12px; padding: 6px 12px; border-radius: 20px; background: white; color: #1C1C1E; border: none; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+    .foco-banner-close { font-size: 16px; color: rgba(255,255,255,0.5); cursor: pointer; flex-shrink: 0; }
+    .tabs { display: flex; border-bottom: 0.5px solid rgba(0,0,0,0.08); background: white; padding: 0 24px; }
+    .tab { font-size: 13px; font-weight: 500; color: #8A8A8E; padding: 10px 16px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -0.5px; }
+    .tab.active { color: #1C1C1E; border-bottom-color: #A0A0A0; }
+    .tab-content { display: none; flex: 1; overflow-y: auto; }
+    .tab-content.active { display: flex; flex-direction: column; }
+    .messages { flex: 1; overflow-y: auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 12px; min-height: 200px; }
+    .bubble { max-width: 80%; padding: 10px 14px; border-radius: 18px; font-size: 14px; line-height: 1.5; }
+    .bubble.user { background: #A0A0A0; color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+    .bubble.maya { background: white; color: #1C1C1E; align-self: flex-start; border: 0.5px solid rgba(0,0,0,0.08); border-bottom-left-radius: 4px; }
+    .input-area { padding: 12px 24px 24px; background: white; border-top: 0.5px solid rgba(0,0,0,0.08); display: flex; gap: 10px; align-items: center; }
+    .input-area input { flex: 1; border: 0.5px solid rgba(0,0,0,0.12); border-radius: 22px; padding: 10px 16px; font-size: 14px; font-family: inherit; outline: none; background: #F2F2F7; color: #1C1C1E; }
     .input-area input::placeholder { color: #AEAEB2; }
-
-    .input-area button {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: #A0A0A0;
-      border: none;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
+    .input-area button { width: 36px; height: 36px; border-radius: 50%; background: #A0A0A0; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .input-area button svg { width: 16px; height: 16px; fill: white; }
-
-    .calendar {
-      padding: 20px 24px;
-      border-top: 0.5px solid rgba(0,0,0,0.08);
-    }
-
-    .calendar-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-    }
-
-    .calendar-header h2 {
-      font-size: 15px;
-      font-weight: 600;
-      color: #1C1C1E;
-    }
-
-    .calendar-header span {
-      font-size: 12px;
-      color: #8A8A8E;
-    }
-
-    .week-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 8px;
-    }
-
-    .day-column {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .day-name {
-      font-size: 11px;
-      font-weight: 500;
-      color: #8A8A8E;
-      text-align: center;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-      margin-bottom: 4px;
-    }
-
-    .day-number {
-      font-size: 13px;
-      font-weight: 500;
-      color: #1C1C1E;
-      text-align: center;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 4px;
-    }
-
+    .calendar { padding: 20px 24px; border-top: 0.5px solid rgba(0,0,0,0.08); }
+    .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .calendar-header h2 { font-size: 15px; font-weight: 600; color: #1C1C1E; }
+    .calendar-nav { display: flex; gap: 8px; align-items: center; }
+    .calendar-nav button { background: none; border: 0.5px solid rgba(0,0,0,0.12); border-radius: 8px; padding: 4px 10px; cursor: pointer; font-size: 13px; color: #636366; font-family: inherit; }
+    .calendar-nav button.active-view { background: #1C1C1E; color: white; border-color: #1C1C1E; }
+    .calendar-nav span { font-size: 12px; color: #8A8A8E; }
+    .week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+    .month-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .month-day-name { font-size: 11px; font-weight: 500; color: #8A8A8E; text-align: center; padding: 4px 0; text-transform: uppercase; }
+    .month-cell { min-height: 60px; border: 0.5px solid rgba(0,0,0,0.06); border-radius: 8px; padding: 4px; }
+    .month-cell.outro-mes { opacity: 0.3; }
+    .month-cell-num { font-size: 12px; font-weight: 500; color: #1C1C1E; text-align: center; margin-bottom: 2px; }
+    .month-cell-num.today { background: #A0A0A0; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; margin: 0 auto 2px; }
+    .day-column { display: flex; flex-direction: column; gap: 4px; }
+    .day-name { font-size: 11px; font-weight: 500; color: #8A8A8E; text-align: center; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 4px; }
+    .day-number { font-size: 13px; font-weight: 500; color: #1C1C1E; text-align: center; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 4px; }
     .day-number.today { background: #A0A0A0; color: white; }
-
-    .event-pill {
-      background: #F2F2F7;
-      border: 0.5px solid rgba(0,0,0,0.08);
-      border-radius: 6px;
-      padding: 4px 6px;
-      font-size: 11px;
-      color: #1C1C1E;
-      line-height: 1.3;
-    }
-
-    .event-pill .pill-time {
-      font-size: 10px;
-      color: #8A8A8E;
-      display: block;
-    }
-
-    .event-pill.task {
-      border-left: 2px solid #A0A0A0;
-      border-radius: 0 6px 6px 0;
-    }
-
-    .event-pill.event {
-      border-left: 2px solid #1C1C1E;
-      border-radius: 0 6px 6px 0;
-    }
-
-    .relatorio-section {
-      padding: 20px 24px;
-      border-top: 0.5px solid rgba(0,0,0,0.08);
-    }
-
-    .relatorio-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-
-    .relatorio-header h2 {
-      font-size: 15px;
-      font-weight: 600;
-      color: #1C1C1E;
-    }
-
-    .relatorio-btn {
-      font-size: 12px;
-      padding: 5px 12px;
-      border-radius: 20px;
-      border: 0.5px solid rgba(0,0,0,0.12);
-      background: transparent;
-      color: #8A8A8E;
-      cursor: pointer;
-      font-family: inherit;
-    }
-
-    .relatorio-card {
-      background: white;
-      border: 0.5px solid rgba(0,0,0,0.08);
-      border-radius: 12px;
-      padding: 14px 16px;
-      font-size: 13px;
-      color: #1C1C1E;
-      line-height: 1.6;
-      white-space: pre-wrap;
-    }
-
-    .relatorio-vazio {
-      font-size: 13px;
-      color: #AEAEB2;
-      text-align: center;
-      padding: 20px 0;
-    }
+    .event-pill { background: #F2F2F7; border: 0.5px solid rgba(0,0,0,0.08); border-radius: 6px; padding: 4px 6px; font-size: 11px; color: #1C1C1E; line-height: 1.3; }
+    .event-pill .pill-time { font-size: 10px; color: #8A8A8E; display: block; }
+    .event-pill.task { border-left: 2px solid #A0A0A0; border-radius: 0 6px 6px 0; }
+    .event-pill.evento { border-left: 2px solid #1C1C1E; border-radius: 0 6px 6px 0; }
+    .event-pill.feito { opacity: 0.45; text-decoration: line-through; }
+    .pill-check { margin-right: 4px; cursor: pointer; font-size: 11px; color: #AEAEB2; }
+    .pill-check:hover { color: #34C759; }
+    .pill-check.checked { color: #34C759; }
+    .pill-delete { margin-left: 4px; color: #AEAEB2; cursor: pointer; font-size: 12px; }
+    .pill-delete:hover { color: #FF3B30; }
+    .month-pill { font-size: 10px; background: #F2F2F7; border-radius: 3px; padding: 1px 4px; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1C1C1E; }
+    .relatorio-section { padding: 20px 24px; border-top: 0.5px solid rgba(0,0,0,0.08); }
+    .relatorio-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .relatorio-header h2 { font-size: 15px; font-weight: 600; color: #1C1C1E; }
+    .relatorio-btn { font-size: 12px; padding: 5px 12px; border-radius: 20px; border: 0.5px solid rgba(0,0,0,0.12); background: transparent; color: #8A8A8E; cursor: pointer; font-family: inherit; }
+    .relatorio-card { background: white; border: 0.5px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 14px 16px; font-size: 13px; color: #1C1C1E; line-height: 1.6; }
+    .relatorio-vazio { font-size: 13px; color: #AEAEB2; text-align: center; padding: 20px 0; }
+    .diario-section { padding: 20px 24px; }
+    .humor-row { display: flex; gap: 8px; margin-bottom: 12px; }
+    .humor-btn { font-size: 20px; background: none; border: 0.5px solid rgba(0,0,0,0.08); border-radius: 10px; padding: 6px 10px; cursor: pointer; opacity: 0.4; transition: opacity 0.15s; }
+    .humor-btn.selected { opacity: 1; background: #F2F2F7; }
+    .diario-textarea { width: 100%; border: 0.5px solid rgba(0,0,0,0.12); border-radius: 12px; padding: 12px 14px; font-size: 14px; font-family: inherit; outline: none; resize: none; background: #F2F2F7; color: #1C1C1E; min-height: 120px; line-height: 1.6; }
+    .diario-save-btn { margin-top: 10px; background: #A0A0A0; color: white; border: none; border-radius: 22px; padding: 10px 20px; font-size: 14px; font-family: inherit; cursor: pointer; }
+    .diario-entry { background: white; border: 0.5px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 12px 14px; margin-top: 10px; }
+    .diario-entry-date { font-size: 11px; color: #8A8A8E; margin-bottom: 6px; }
+    .diario-entry-text { font-size: 13px; color: #1C1C1E; line-height: 1.5; }
+    .metas-section { padding: 20px 24px; }
+    .meta-card { background: white; border: 0.5px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; }
+    .meta-titulo { font-size: 14px; font-weight: 500; color: #1C1C1E; }
+    .meta-desc { font-size: 12px; color: #8A8A8E; margin-top: 3px; }
+    .meta-categoria { font-size: 10px; padding: 2px 8px; border-radius: 10px; background: #F2F2F7; color: #636366; display: inline-block; margin-top: 6px; }
+    .add-meta-form { background: #F2F2F7; border-radius: 12px; padding: 14px; margin-bottom: 16px; }
+    .add-meta-form input, .add-meta-form select { width: 100%; border: 0.5px solid rgba(0,0,0,0.12); border-radius: 8px; padding: 8px 12px; font-size: 13px; font-family: inherit; outline: none; background: white; color: #1C1C1E; margin-bottom: 8px; }
+    .add-meta-btn { background: #A0A0A0; color: white; border: none; border-radius: 20px; padding: 8px 18px; font-size: 13px; font-family: inherit; cursor: pointer; }
+    .analise-btn { margin: 0 24px 12px; background: white; border: 0.5px solid rgba(0,0,0,0.12); border-radius: 22px; padding: 10px 20px; font-size: 13px; font-family: inherit; cursor: pointer; color: #1C1C1E; width: calc(100% - 48px); }
+    .analise-resultado { margin: 0 24px 24px; background: white; border: 0.5px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 14px 16px; font-size: 13px; color: #1C1C1E; line-height: 1.7; display: none; }
+    .guia-section { padding: 24px; }
+    .guia-intro { background: #1C1C1E; border-radius: 16px; padding: 20px; margin-bottom: 20px; color: white; }
+    .guia-intro h2 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+    .guia-intro p { font-size: 13px; line-height: 1.6; opacity: 0.8; }
+    .guia-categoria { margin-bottom: 20px; }
+    .guia-categoria h3 { font-size: 12px; font-weight: 600; color: #8A8A8E; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+    .guia-card { background: white; border: 0.5px solid rgba(0,0,0,0.08); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; }
+    .guia-card-title { font-size: 13px; font-weight: 500; color: #1C1C1E; margin-bottom: 4px; }
+    .guia-card-desc { font-size: 12px; color: #8A8A8E; line-height: 1.5; }
+    .guia-exemplo { font-size: 12px; color: #A0A0A0; font-style: italic; margin-top: 4px; }
   </style>
 </head>
 <body>
 
   <div class="header">
-    <h1>Maya</h1>
-    <p>Sua agenda inteligente</p>
+    <div>
+      <h1>Maya</h1>
+      <p>Sua assistente pessoal</p>
+    </div>
+    <div class="header-right">
+      <div class="foco-badge visivel" id="focoBadge" onclick="verificarFoco()">✦ Foco</div>
+    </div>
+  </div>
+
+  <div class="foco-banner" id="focoBanner">
+    <div class="foco-banner-text">
+      <strong id="focoHorario"></strong><br>
+      <span id="focoMotivo"></span>
+    </div>
+    <button class="foco-banner-btn" onclick="agendarFoco()">Bloquear tempo</button>
+    <span class="foco-banner-close" onclick="fecharFoco()">×</span>
   </div>
 
   <div class="tabs">
     <div class="tab active" onclick="switchTab('agenda')">Agenda</div>
     <div class="tab" onclick="switchTab('diario')">Diário</div>
     <div class="tab" onclick="switchTab('metas')">Metas</div>
+    <div class="tab" onclick="switchTab('guia')">Guia</div>
   </div>
 
-  <!-- ABA AGENDA -->
   <div class="tab-content active" id="tab-agenda">
     <div class="messages" id="messages">
-      <div class="bubble maya">
-        Oi! Sou a Maya. Me diga um compromisso, tarefa ou lembrete.
-      </div>
+      <div class="bubble maya">Oi! Sou a Maya. Me diga um compromisso, tarefa ou lembrete — ou pergunte qualquer coisa sobre sua agenda e metas.</div>
     </div>
-
     <div class="input-area">
       <input type="text" id="inputField" placeholder="Ex: reunião quinta às 14h..." />
       <button id="sendBtn">
-        <svg viewBox="0 0 24 24">
-          <path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>
-        </svg>
+        <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
       </button>
     </div>
-
     <div class="calendar">
       <div class="calendar-header">
-        <h2>Esta semana</h2>
-        <span id="weekRange"></span>
+        <h2 id="calendarTitle">Esta semana</h2>
+        <div class="calendar-nav">
+          <button onclick="navegarCalendario(-1)">‹</button>
+          <button id="btnSemana" class="active-view" onclick="setVisualizacao('semana')">Semana</button>
+          <button id="btnMes" onclick="setVisualizacao('mes')">Mês</button>
+          <button onclick="navegarCalendario(1)">›</button>
+        </div>
       </div>
-      <div class="week-grid" id="weekGrid"></div>
+      <div id="calendarGrid"></div>
     </div>
-
     <div class="relatorio-section">
       <div class="relatorio-header">
         <h2>Relatório da semana</h2>
         <button class="relatorio-btn" onclick="gerarRelatorioAgora()">Gerar agora</button>
       </div>
-      <div id="relatorioConteudo">
-        <div class="relatorio-vazio">Nenhum relatório ainda.</div>
-      </div>
+      <div id="relatorioConteudo"><div class="relatorio-vazio">Nenhum relatório ainda.</div></div>
     </div>
   </div>
 
-  <!-- ABA DIÁRIO -->
   <div class="tab-content" id="tab-diario">
     <div class="diario-section">
       <p style="font-size:13px;color:#8A8A8E;margin-bottom:12px;">Como você está hoje?</p>
@@ -539,7 +181,6 @@
     </div>
   </div>
 
-  <!-- ABA METAS -->
   <div class="tab-content" id="tab-metas">
     <div class="metas-section">
       <div class="add-meta-form">
@@ -559,158 +200,139 @@
       </div>
       <div id="listaMetasContainer"></div>
     </div>
-
     <button class="analise-btn" onclick="gerarAnalise()">✦ Analisar alinhamento com minhas metas</button>
-    <div id="analiseResultado" style="display:none" class="analise-resultado"></div>
+    <div id="analiseResultado" class="analise-resultado"></div>
   </div>
 
-</body>
+  <div class="tab-content" id="tab-guia">
+    <div class="guia-section">
+      <div class="guia-intro">
+        <h2>Como usar a Maya</h2>
+        <p>A Maya entende linguagem natural — fale com ela como falaria com uma pessoa. Quanto mais você usar e preencher suas metas e diário, mais inteligente ela fica.</p>
+      </div>
+
+      <div class="guia-categoria">
+        <h3>📅 Agenda</h3>
+        <div class="guia-card">
+          <div class="guia-card-title">Adicionar evento com hora</div>
+          <div class="guia-card-desc">Qualquer compromisso com horário definido.</div>
+          <div class="guia-exemplo">"reunião com cliente quinta às 14h" · "dentista amanhã às 10h30" · "call sexta 16h"</div>
+        </div>
+        <div class="guia-card">
+          <div class="guia-card-title">Adicionar tarefa sem hora</div>
+          <div class="guia-card-desc">Coisas para fazer sem horário fixo.</div>
+          <div class="guia-exemplo">"comprar café" · "enviar proposta até sexta" · "ligar para o banco"</div>
+        </div>
+        <div class="guia-card">
+          <div class="guia-card-title">Eventos recorrentes</div>
+          <div class="guia-card-desc">A Maya cria automaticamente para cada dia.</div>
+          <div class="guia-exemplo">"aula de inglês segunda e quarta às 19h" · "academia toda segunda, quarta e sexta às 7h"</div>
+        </div>
+        <div class="guia-card">
+          <div class="guia-card-title">Editar compromisso</div>
+          <div class="guia-card-desc">Remarcar ou renomear algo existente.</div>
+          <div class="guia-exemplo">"muda a reunião de quinta para sexta às 15h" · "renomeia o dentista para consulta médica"</div>
+        </div>
+        <div class="guia-card">
+          <div class="guia-card-title">Apagar compromisso</div>
+          <div class="guia-card-desc">Remover pelo chat ou clicar no × no calendário.</div>
+          <div class="guia-exemplo">"apaga a reunião de quinta" · "remove o dentista de amanhã"</div>
+        </div>
+        <div class="guia-card">
+          <div class="guia-card-title">Consultar agenda</div>
+          <div class="guia-card-desc">Perguntar o que tem em determinado período.</div>
+          <div class="guia-exemplo">"o que tenho hoje?" · "minha agenda dessa semana" · "próximos compromissos"</div>
+        </div>
+      </div>
+
+      <div class="guia-categoria">
+        <h3>🎯 Metas e progresso</h3>
+        <div class="guia-card">
+          <div class="guia-card-title">Perguntar sobre suas metas</div>
+          <div class="guia-card-desc">A Maya analisa sua rotina e responde com honestidade.</div>
+          <div class="guia-exemplo">"estou no caminho certo?" · "o que devo priorizar essa semana?" · "como posso melhorar?"</div>
+        </div>
+        <div class="guia-card">
+          <div class="guia-card-title">Análise de alinhamento</div>
+          <div class="guia-card-desc">Na aba Metas, clica em "Analisar alinhamento" para ver nota e sugestões detalhadas.</div>
+        </div>
+      </div>
+
+      <div class="guia-categoria">
+        <h3>📓 Diário</h3>
+        <div class="guia-card">
+          <div class="guia-card-title">Registro diário</div>
+          <div class="guia-card-desc">Escreva sobre seu dia, bloqueios, conquistas e humor. A Maya usa isso para análises mais precisas.</div>
+          <div class="guia-exemplo">Quanto mais detalhado, mais inteligente a análise semanal fica.</div>
+        </div>
+      </div>
+
+      <div class="guia-categoria">
+        <h3>✦ Modo Foco</h3>
+        <div class="guia-card">
+          <div class="guia-card-title">Sugestão automática de foco</div>
+          <div class="guia-card-desc">Clica em "✦ Foco" no topo para ver se a Maya detectou uma janela de tempo livre hoje e sugere bloquear para trabalho profundo.</div>
+        </div>
+      </div>
+
+      <div class="guia-categoria">
+        <h3>📊 Relatório semanal</h3>
+        <div class="guia-card">
+          <div class="guia-card-title">Resumo automático</div>
+          <div class="guia-card-desc">Todo domingo às 20h a Maya gera automaticamente um relatório com resumo da semana, distribuição de tempo, alinhamento com metas e sugestão para a próxima semana. Você também pode gerar manualmente a qualquer momento.</div>
+        </div>
+      </div>
+
+      <div class="guia-categoria">
+        <h3>🔔 Notificações</h3>
+        <div class="guia-card">
+          <div class="guia-card-title">Alertas automáticos</div>
+          <div class="guia-card-desc">A Maya avisa 30 minutos antes de cada evento com hora marcada. Funciona no Mac e no iPhone quando o app está salvo na tela inicial.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
 
   <script>
-    async function toggleFeito(id, feito) {
-  await fetch(`/eventos/${id}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ feito })
-  })
-  const ev = eventos.find(e => e.id === id)
-  if (ev) ev.feito = feito
-  buildCalendar()
-}
-    async function deletarEvento(id) {
-  await fetch(`/eventos/${id}`, { method: 'DELETE' })
-  eventos = eventos.filter(ev => ev.id !== id)
-  buildCalendar()
-}
     const messages = document.getElementById('messages')
     const inputField = document.getElementById('inputField')
     const sendBtn = document.getElementById('sendBtn')
     const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
     const meses = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez']
+    const mesesCompletos = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
 
     let eventos = []
+    let visualizacao = 'semana'
+    let offsetSemana = 0
+    let offsetMes = 0
+    let humorSelecionado = null
+    let sugestaoFoco = null
 
     async function pedirPermissaoNotificacao() {
       if (!('Notification' in window)) return
-      if (Notification.permission === 'default') {
-        await Notification.requestPermission()
-      }
+      if (Notification.permission === 'default') await Notification.requestPermission()
     }
 
     function notificar(titulo, corpo) {
-      if (Notification.permission === 'granted') {
-        new Notification(titulo, { body: corpo })
-      }
+      if (Notification.permission === 'granted') new Notification(titulo, { body: corpo })
     }
 
     function agendarAlerta(evento) {
       if (!evento.hora || !evento.data) return
       const dataHoraEvento = new Date(`${evento.data}T${evento.hora}:00`)
-      const trintaMinutesAntes = new Date(dataHoraEvento.getTime() - 30 * 60 * 1000)
+      const antes = new Date(dataHoraEvento.getTime() - 30 * 60 * 1000)
       const agora = new Date()
-      const msAteAlerta = trintaMinutesAntes.getTime() - agora.getTime()
-      if (msAteAlerta > 0) {
-        setTimeout(() => {
-          notificar(`⏰ Em 30 minutos: ${evento.titulo}`, `Hoje às ${evento.hora}`)
-        }, msAteAlerta)
-        console.log(`Alerta agendado para ${evento.titulo} em ${Math.round(msAteAlerta / 60000)} minutos`)
+      const ms = antes.getTime() - agora.getTime()
+      if (ms > 0) {
+        setTimeout(() => notificar(`⏰ Em 30 minutos: ${evento.titulo}`, `Hoje às ${evento.hora}`), ms)
+        console.log(`Alerta: ${evento.titulo} em ${Math.round(ms/60000)} min`)
       }
     }
-// TABS
-    function switchTab(tab) {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
-      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'))
-      document.querySelector(`[onclick="switchTab('${tab}')"]`).classList.add('active')
-      document.getElementById(`tab-${tab}`).classList.add('active')
-    }
 
-    // DIÁRIO
-    let humorSelecionado = null
-
-    function selecionarHumor(valor) {
-      humorSelecionado = valor
-      document.querySelectorAll('.humor-btn').forEach(btn => {
-        btn.classList.toggle('selected', parseInt(btn.dataset.humor) === valor)
-      })
-    }
-
-    async function salvarDiario() {
-      const conteudo = document.getElementById('diarioTexto').value.trim()
-      if (!conteudo) return
-      await fetch('/diario', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          conteudo,
-          humor: humorSelecionado,
-          data: new Date().toISOString().split('T')[0]
-        })
-      })
-      document.getElementById('diarioTexto').value = ''
-      humorSelecionado = null
-      document.querySelectorAll('.humor-btn').forEach(b => b.classList.remove('selected'))
-      carregarDiario()
-    }
-
-    async function carregarDiario() {
-      const resposta = await fetch('/diario')
-      const entradas = await resposta.json()
-      const container = document.getElementById('diarioEntradas')
-      container.innerHTML = entradas.map(e => `
-        <div class="diario-entry">
-          <div class="diario-entry-date">${new Date(e.data + 'T00:00:00').toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })} ${e.humor ? '— ' + ['😔','😕','😐','😊','🤩'][e.humor - 1] : ''}</div>
-          <div class="diario-entry-text">${e.conteudo}</div>
-        </div>
-      `).join('')
-    }
-
-    // METAS
-    async function salvarMeta() {
-      const titulo = document.getElementById('metaTitulo').value.trim()
-      if (!titulo) return
-      await fetch('/metas', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          titulo,
-          descricao: document.getElementById('metaDescricao').value,
-          categoria: document.getElementById('metaCategoria').value
-        })
-      })
-      document.getElementById('metaTitulo').value = ''
-      document.getElementById('metaDescricao').value = ''
-      carregarMetas()
-    }
-
-    async function carregarMetas() {
-      const resposta = await fetch('/metas')
-      const metas = await resposta.json()
-      const container = document.getElementById('listaMetasContainer')
-      container.innerHTML = metas.map(m => `
-        <div class="meta-card">
-          <div class="meta-titulo">${m.titulo}</div>
-          ${m.descricao ? `<div class="meta-desc">${m.descricao}</div>` : ''}
-          ${m.categoria ? `<span class="meta-categoria">${m.categoria}</span>` : ''}
-        </div>
-      `).join('')
-    }
-
-    async function gerarAnalise() {
-      const div = document.getElementById('analiseResultado')
-      div.style.display = 'block'
-      div.textContent = 'Analisando...'
-      const resposta = await fetch('/analise')
-      const dados = await resposta.json()
-      div.innerHTML = dados.conteudo
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\n/g, '<br>')
-    }
-
-    carregarDiario()
-    carregarMetas()
     async function carregarEventos() {
-      const resposta = await fetch('/eventos')
-      eventos = await resposta.json()
+      const r = await fetch('/eventos')
+      eventos = await r.json()
       eventos.forEach(ev => agendarAlerta(ev))
       buildCalendar()
     }
@@ -718,93 +340,95 @@
     function addBubble(text, sender) {
       const bubble = document.createElement('div')
       bubble.classList.add('bubble', sender)
-      bubble.textContent = text
+      bubble.innerHTML = text.replace(/\n/g, '<br>')
       messages.appendChild(bubble)
       messages.scrollTop = messages.scrollHeight
     }
 
-async function sendMessage() {
-  const text = inputField.value.trim()
-  if (!text) return
-  addBubble(text, 'user')
-  inputField.value = ''
-  addBubble('...', 'maya')
-  try {
-    const resposta = await fetch('/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mensagem: text, eventos })
-    })
-    const dados = await resposta.json()
-    messages.lastChild.remove()
-
-    if (dados.conflito) {
-      addBubble(`⚠️ ${dados.mensagem_conflito}`, 'maya')
-      return
-    }
-
-    if (dados.tipo === 'delete') {
-      const evento = eventos.find(ev =>
-        ev.titulo.toLowerCase().includes(dados.titulo.toLowerCase())
-      )
-      if (evento) {
-        await deletarEvento(evento.id)
-        addBubble(dados.confirmacao, 'maya')
-      } else {
-        addBubble('Não encontrei esse evento na agenda.', 'maya')
-      }
-      return
-    }
-
-    if (dados.tipo === 'editar') {
-      const evento = eventos.find(ev =>
-        ev.titulo.toLowerCase().includes(dados.titulo_original.toLowerCase())
-      )
-      if (evento) {
-        await fetch(`/eventos/${evento.id}`, {
-          method: 'PUT',
+    async function sendMessage() {
+      const text = inputField.value.trim()
+      if (!text) return
+      addBubble(text, 'user')
+      inputField.value = ''
+      addBubble('...', 'maya')
+      try {
+        const r = await fetch('/chat', {
+          method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            titulo: dados.titulo,
-            data: dados.data,
-            hora: dados.hora
-          })
+          body: JSON.stringify({ mensagem: text, eventos })
         })
-        evento.titulo = dados.titulo
-        evento.data = dados.data
-        evento.hora = dados.hora
+        const dados = await r.json()
+        messages.lastChild.remove()
+
+        if (dados.conflito) { addBubble(`⚠️ ${dados.mensagem_conflito}`, 'maya'); return }
+
+        if (dados.tipo === 'delete') {
+          const ev = eventos.find(e => e.titulo.toLowerCase().includes(dados.titulo.toLowerCase()))
+          if (ev) { await deletarEvento(ev.id); addBubble(dados.confirmacao, 'maya') }
+          else addBubble('Não encontrei esse evento.', 'maya')
+          return
+        }
+
+        if (dados.tipo === 'editar') {
+          const ev = eventos.find(e => e.titulo.toLowerCase().includes(dados.titulo_original.toLowerCase()))
+          if (ev) {
+            await fetch(`/eventos/${ev.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ titulo: dados.titulo, data: dados.data, hora: dados.hora }) })
+            ev.titulo = dados.titulo; ev.data = dados.data; ev.hora = dados.hora
+            addBubble(dados.confirmacao, 'maya')
+            buildCalendar()
+          } else addBubble('Não encontrei esse evento.', 'maya')
+          return
+        }
+
+        if (dados.tipo === 'reflexao' || dados.tipo === 'busca') {
+          addBubble(dados.confirmacao, 'maya')
+          return
+        }
+
+        if (dados.lista) { eventos.push(...dados.lista); dados.lista.forEach(ev => agendarAlerta(ev)) }
         addBubble(dados.confirmacao, 'maya')
         buildCalendar()
-      } else {
-        addBubble('Não encontrei esse evento na agenda.', 'maya')
+      } catch (erro) {
+        messages.lastChild.remove()
+        addBubble('Ops, algo deu errado. Tenta de novo.', 'maya')
+        console.error(erro)
       }
-      return
     }
 
-    if (dados.lista) {
-      eventos.push(...dados.lista)
-      dados.lista.forEach(ev => agendarAlerta(ev))
+    function setVisualizacao(v) {
+      visualizacao = v
+      offsetSemana = 0
+      offsetMes = 0
+      document.getElementById('btnSemana').classList.toggle('active-view', v === 'semana')
+      document.getElementById('btnMes').classList.toggle('active-view', v === 'mes')
+      buildCalendar()
     }
 
-    addBubble(dados.confirmacao, 'maya')
-    buildCalendar()
+    function navegarCalendario(dir) {
+      if (visualizacao === 'semana') offsetSemana += dir
+      else offsetMes += dir
+      buildCalendar()
+    }
 
-  } catch (erro) {
-    messages.lastChild.remove()
-    addBubble('Ops, algo deu errado. Tenta de novo.', 'maya')
-    console.error(erro)
-  }
-}
     function buildCalendar() {
-      const grid = document.getElementById('weekGrid')
-      const weekRange = document.getElementById('weekRange')
+      if (visualizacao === 'semana') buildSemana()
+      else buildMes()
+    }
+
+    function buildSemana() {
+      const grid = document.getElementById('calendarGrid')
+      const title = document.getElementById('calendarTitle')
       grid.innerHTML = ''
       const hoje = new Date()
       const domingo = new Date(hoje)
-      domingo.setDate(hoje.getDate() - hoje.getDay())
+      domingo.setDate(hoje.getDate() - hoje.getDay() + offsetSemana * 7)
       const sabado = new Date(domingo)
       sabado.setDate(domingo.getDate() + 6)
-      weekRange.textContent = `${domingo.getDate()} ${meses[domingo.getMonth()]} – ${sabado.getDate()} ${meses[sabado.getMonth()]}`
+      title.textContent = `${domingo.getDate()} ${meses[domingo.getMonth()]} – ${sabado.getDate()} ${meses[sabado.getMonth()]}`
+
+      const weekGrid = document.createElement('div')
+      weekGrid.classList.add('week-grid')
+
       for (let i = 0; i < 7; i++) {
         const dia = new Date(domingo)
         dia.setDate(domingo.getDate() + i)
@@ -816,98 +440,247 @@ async function sendMessage() {
         const numeroDia = document.createElement('div')
         numeroDia.classList.add('day-number')
         numeroDia.textContent = dia.getDate()
-        if (dia.toDateString() === hoje.toDateString()) {
-          numeroDia.classList.add('today')
-        }
+        if (dia.toDateString() === hoje.toDateString()) numeroDia.classList.add('today')
         coluna.appendChild(nomeDia)
         coluna.appendChild(numeroDia)
-        const eventosDoDia = eventos.filter(ev => {
+        const evDia = eventos.filter(ev => {
           if (!ev.data) return false
-          const dataEvento = new Date(ev.data + 'T00:00:00')
-          return dataEvento.toDateString() === dia.toDateString()
+          return new Date(ev.data + 'T00:00:00').toDateString() === dia.toDateString()
         })
-        eventosDoDia.forEach(ev => {
-  const pill = document.createElement('div')
-  pill.classList.add('event-pill', ev.tipo)
-  if (ev.feito) pill.classList.add('feito')
+        evDia.forEach(ev => coluna.appendChild(criarPill(ev)))
+        weekGrid.appendChild(coluna)
+      }
+      grid.appendChild(weekGrid)
+    }
 
-  const check = document.createElement('span')
-  check.classList.add('pill-check')
-  check.textContent = ev.feito ? '✓' : '○'
-  if (ev.feito) check.classList.add('checked')
-  check.addEventListener('click', (e) => {
-    e.stopPropagation()
-    toggleFeito(ev.id, !ev.feito)
-  })
+    function buildMes() {
+      const grid = document.getElementById('calendarGrid')
+      const title = document.getElementById('calendarTitle')
+      grid.innerHTML = ''
+      const hoje = new Date()
+      const ref = new Date(hoje.getFullYear(), hoje.getMonth() + offsetMes, 1)
+      title.textContent = `${mesesCompletos[ref.getMonth()]} ${ref.getFullYear()}`
 
-  const deleteBtn = document.createElement('span')
-  deleteBtn.classList.add('pill-delete')
-  deleteBtn.textContent = '×'
-  deleteBtn.addEventListener('click', (e) => {
-    e.stopPropagation()
-    deletarEvento(ev.id)
-  })
+      const monthGrid = document.createElement('div')
+      monthGrid.classList.add('month-grid')
 
-  const conteudo = document.createElement('span')
-  if (ev.hora) {
-    conteudo.innerHTML = `<span class="pill-time">${ev.hora}</span>${ev.titulo}`
-  } else {
-    conteudo.textContent = ev.titulo
-  }
-
-  pill.appendChild(check)
-  pill.appendChild(conteudo)
-  pill.appendChild(deleteBtn)
-  coluna.appendChild(pill)
+      diasSemana.forEach(d => {
+        const el = document.createElement('div')
+        el.classList.add('month-day-name')
+        el.textContent = d
+        monthGrid.appendChild(el)
       })
 
-      grid.appendChild(coluna)
+      const primeiroDia = ref.getDay()
+      const diasNoMes = new Date(ref.getFullYear(), ref.getMonth() + 1, 0).getDate()
+      const mesPrev = new Date(ref.getFullYear(), ref.getMonth(), 0)
+
+      for (let i = 0; i < primeiroDia; i++) {
+        const cell = document.createElement('div')
+        cell.classList.add('month-cell', 'outro-mes')
+        const num = document.createElement('div')
+        num.classList.add('month-cell-num')
+        num.textContent = mesPrev.getDate() - primeiroDia + i + 1
+        cell.appendChild(num)
+        monthGrid.appendChild(cell)
+      }
+
+      for (let d = 1; d <= diasNoMes; d++) {
+        const cell = document.createElement('div')
+        cell.classList.add('month-cell')
+        const num = document.createElement('div')
+        num.classList.add('month-cell-num')
+        num.textContent = d
+        const dataStr = `${ref.getFullYear()}-${String(ref.getMonth()+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
+        if (new Date(dataStr + 'T00:00:00').toDateString() === hoje.toDateString()) num.classList.add('today')
+        cell.appendChild(num)
+        const evDia = eventos.filter(ev => ev.data === dataStr)
+        evDia.slice(0, 2).forEach(ev => {
+          const pill = document.createElement('div')
+          pill.classList.add('month-pill')
+          pill.textContent = ev.titulo
+          cell.appendChild(pill)
+        })
+        if (evDia.length > 2) {
+          const mais = document.createElement('div')
+          mais.classList.add('month-pill')
+          mais.style.color = '#8A8A8E'
+          mais.textContent = `+${evDia.length - 2}`
+          cell.appendChild(mais)
+        }
+        monthGrid.appendChild(cell)
+      }
+
+      grid.appendChild(monthGrid)
     }
-  }
+
+    function criarPill(ev) {
+      const pill = document.createElement('div')
+      pill.classList.add('event-pill', ev.tipo)
+      if (ev.feito) pill.classList.add('feito')
+      const check = document.createElement('span')
+      check.classList.add('pill-check')
+      check.textContent = ev.feito ? '✓' : '○'
+      if (ev.feito) check.classList.add('checked')
+      check.addEventListener('click', e => { e.stopPropagation(); toggleFeito(ev.id, !ev.feito) })
+      const deleteBtn = document.createElement('span')
+      deleteBtn.classList.add('pill-delete')
+      deleteBtn.textContent = '×'
+      deleteBtn.addEventListener('click', e => { e.stopPropagation(); deletarEvento(ev.id) })
+      const conteudo = document.createElement('span')
+      if (ev.hora) conteudo.innerHTML = `<span class="pill-time">${ev.hora}</span>${ev.titulo}`
+      else conteudo.textContent = ev.titulo
+      pill.appendChild(check)
+      pill.appendChild(conteudo)
+      pill.appendChild(deleteBtn)
+      return pill
+    }
+
+    async function deletarEvento(id) {
+      await fetch(`/eventos/${id}`, { method: 'DELETE' })
+      eventos = eventos.filter(ev => ev.id !== id)
+      buildCalendar()
+    }
+
+    async function toggleFeito(id, feito) {
+      await fetch(`/eventos/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ feito }) })
+      const ev = eventos.find(e => e.id === id)
+      if (ev) ev.feito = feito
+      buildCalendar()
+    }
 
     async function carregarRelatorio() {
       try {
-        const resposta = await fetch('/relatorios')
-        const dados = await resposta.json()
-        if (dados && dados.length > 0) {
-          mostrarRelatorio(dados[0].conteudo)
-        }
-      } catch (e) {
-        console.log('Sem relatórios ainda')
-      }
+        const r = await fetch('/relatorios')
+        const dados = await r.json()
+        if (dados && dados.length > 0) mostrarRelatorio(dados[0].conteudo)
+      } catch (e) {}
     }
 
     function mostrarRelatorio(conteudo) {
-    const div = document.getElementById('relatorioConteudo')
-    const formatado = conteudo
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\n/g, '<br>')
-    div.innerHTML = `<div class="relatorio-card">${formatado}</div>`
+      const div = document.getElementById('relatorioConteudo')
+      div.innerHTML = `<div class="relatorio-card">${conteudo.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')}</div>`
     }
 
     async function gerarRelatorioAgora() {
-      const div = document.getElementById('relatorioConteudo')
-      div.innerHTML = '<div class="relatorio-vazio">Analisando sua semana...</div>'
-      const resposta = await fetch('/gerar-relatorio')
-      const dados = await resposta.json()
-      if (dados.conteudo) {
-        mostrarRelatorio(dados.conteudo)
+      document.getElementById('relatorioConteudo').innerHTML = '<div class="relatorio-vazio">Analisando sua semana...</div>'
+      const r = await fetch('/gerar-relatorio')
+      const dados = await r.json()
+      if (dados.conteudo) mostrarRelatorio(dados.conteudo)
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'))
+      document.querySelector(`[onclick="switchTab('${tab}')"]`).classList.add('active')
+      document.getElementById(`tab-${tab}`).classList.add('active')
+    }
+
+    function selecionarHumor(valor) {
+      humorSelecionado = valor
+      document.querySelectorAll('.humor-btn').forEach(btn => {
+        btn.classList.toggle('selected', parseInt(btn.dataset.humor) === valor)
+      })
+    }
+
+    async function salvarDiario() {
+      const conteudo = document.getElementById('diarioTexto').value.trim()
+      if (!conteudo) return
+      await fetch('/diario', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ conteudo, humor: humorSelecionado, data: new Date().toISOString().split('T')[0] }) })
+      document.getElementById('diarioTexto').value = ''
+      humorSelecionado = null
+      document.querySelectorAll('.humor-btn').forEach(b => b.classList.remove('selected'))
+      carregarDiario()
+    }
+
+    async function carregarDiario() {
+      const r = await fetch('/diario')
+      const entradas = await r.json()
+      document.getElementById('diarioEntradas').innerHTML = entradas.map(e => `
+        <div class="diario-entry">
+          <div class="diario-entry-date">${new Date(e.data + 'T00:00:00').toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })} ${e.humor ? '— ' + ['😔','😕','😐','😊','🤩'][e.humor-1] : ''}</div>
+          <div class="diario-entry-text">${e.conteudo}</div>
+        </div>`).join('')
+    }
+
+    async function salvarMeta() {
+      const titulo = document.getElementById('metaTitulo').value.trim()
+      if (!titulo) return
+      await fetch('/metas', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ titulo, descricao: document.getElementById('metaDescricao').value, categoria: document.getElementById('metaCategoria').value }) })
+      document.getElementById('metaTitulo').value = ''
+      document.getElementById('metaDescricao').value = ''
+      carregarMetas()
+    }
+
+    async function carregarMetas() {
+      const r = await fetch('/metas')
+      const metas = await r.json()
+      document.getElementById('listaMetasContainer').innerHTML = metas.map(m => `
+        <div class="meta-card">
+          <div class="meta-titulo">${m.titulo}</div>
+          ${m.descricao ? `<div class="meta-desc">${m.descricao}</div>` : ''}
+          ${m.categoria ? `<span class="meta-categoria">${m.categoria}</span>` : ''}
+        </div>`).join('')
+    }
+
+    async function gerarAnalise() {
+      const div = document.getElementById('analiseResultado')
+      div.style.display = 'block'
+      div.textContent = 'Analisando...'
+      const r = await fetch('/analise')
+      const dados = await r.json()
+      div.innerHTML = dados.conteudo.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')
+    }
+
+    async function verificarFoco() {
+      const r = await fetch('/modo-foco')
+      const dados = await r.json()
+      if (dados.tem_foco) {
+        sugestaoFoco = dados
+        document.getElementById('focoHorario').textContent = `✦ Foco sugerido: ${dados.horario_sugerido}`
+        document.getElementById('focoMotivo').textContent = dados.meta_relacionada ? `Relacionado a: ${dados.meta_relacionada}` : dados.motivo
+        document.getElementById('focoBanner').classList.add('visivel')
+      } else {
+        addBubble('Sua agenda hoje está cheia — sem janelas grandes de foco. Tenta amanhã cedo!', 'maya')
+        switchTab('agenda')
       }
     }
 
+    async function agendarFoco() {
+      if (!sugestaoFoco) return
+      const horarios = sugestaoFoco.horario_sugerido.match(/\d+/g)
+      if (horarios) {
+        const hoje = new Date().toISOString().split('T')[0]
+        await fetch('/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mensagem: `bloco de foco ${sugestaoFoco.horario_sugerido} hoje`, eventos })
+        })
+        await carregarEventos()
+      }
+      fecharFoco()
+      addBubble(`✦ Bloquei ${sugestaoFoco.horario_sugerido} como Tempo de Foco. Notificações silenciadas nesse período.`, 'maya')
+      switchTab('agenda')
+    }
+
+    function fecharFoco() {
+      document.getElementById('focoBanner').classList.remove('visivel')
+    }
+
     sendBtn.addEventListener('click', sendMessage)
-    inputField.addEventListener('keydown', e => {
-      if (e.key === 'Enter') sendMessage()
-    })
+    inputField.addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage() })
 
     carregarEventos()
     carregarRelatorio()
+    carregarDiario()
+    carregarMetas()
     pedirPermissaoNotificacao()
+    setTimeout(verificarFoco, 2000)
 
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js')
-        .then(() => console.log('Service Worker registrado'))
-        .catch(err => console.log('Erro no SW:', err))
+        .then(() => console.log('SW registrado'))
+        .catch(err => console.log('SW erro:', err))
     }
   </script>
 

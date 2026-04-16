@@ -103,7 +103,9 @@ Se o usuário fizer uma pergunta pessoal sobre metas, progresso, rotina ou pedir
 
 CONTEXTO PESSOAL DA USUÁRIA:
 ${metas && metas.length > 0 ? `Metas: ${JSON.stringify(metas)}` : 'Sem metas cadastradas ainda.'}
-${diarioRecente && diarioRecente.length > 0 ? `Diário recente: ${JSON.stringify(diarioRecente)}` : ''}`
+${diarioRecente && diarioRecente.length > 0 ? `Diário recente: ${JSON.stringify(diarioRecente)}` : ''}
+Se o usuário perguntar sobre seus compromissos, agenda, o que tem hoje/essa semana/amanhã (ex: "o que tenho hoje?", "minha agenda dessa semana", "próximos compromissos"), retorne:
+{"tipo":"busca","periodo":"hoje|semana|amanhã|mes","confirmacao":"resposta organizada listando os eventos encontrados"}`
         },
         { role: 'user', content: mensagem }
       ]
@@ -113,9 +115,9 @@ ${diarioRecente && diarioRecente.length > 0 ? `Diário recente: ${JSON.stringify
     const dados = JSON.parse(texto)
     const lista = Array.isArray(dados) ? dados : [dados]
 
-    if (lista[0].tipo === 'delete' || lista[0].tipo === 'editar' || lista[0].tipo === 'reflexao') {
-      return res.json(lista[0])
-    }
+    if (lista[0].tipo === 'delete' || lista[0].tipo === 'editar' || lista[0].tipo === 'reflexao' || lista[0].tipo === 'busca') {
+  return res.json(lista[0])
+}
 
     const conflito = lista.find(ev => ev.conflito)
     if (conflito) {
@@ -291,6 +293,39 @@ Diário recente: ${JSON.stringify(diario)}`
 })
 
 const PORT = process.env.PORT || 3000
+
+app.get('/modo-foco', async (req, res) => {
+  const hoje = new Date().toISOString().split('T')[0]
+  const { data: eventos } = await supabase
+    .from('events')
+    .select('*')
+    .eq('data', hoje)
+    .order('hora', { ascending: true })
+
+  const { data: metas } = await supabase
+    .from('metas').select('*').eq('ativa', true)
+
+  const resposta = await openai.chat.completions.create({
+    model: 'gpt-4o-mini',
+    messages: [
+      {
+        role: 'system',
+        content: `Você é a Maya. Analise a agenda de hoje e identifique janelas de tempo livre.
+Se houver 2+ horas livres consecutivas, sugira um bloco de foco profundo.
+Retorne JSON puro:
+{"tem_foco": true/false, "horario_sugerido": "14h às 16h", "motivo": "explicação curta", "meta_relacionada": "qual meta esse foco ajuda"}`
+      },
+      {
+        role: 'user',
+        content: `Agenda de hoje: ${JSON.stringify(eventos || [])}
+Metas: ${JSON.stringify(metas || [])}`
+      }
+    ]
+  })
+
+  const dados = JSON.parse(resposta.choices[0].message.content)
+  res.json(dados)
+})
 app.listen(PORT, () => {
   console.log(`Maya rodando em http://localhost:${PORT}`)
 })
